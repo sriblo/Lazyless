@@ -1001,9 +1001,6 @@ function obBack() {
 }
 
 function obNext() {
-  if (obState.step === 1 && !obState.name.trim()) {
-    obState.name = 'Друг';
-  }
   obState.step++;
   renderOnboarding();
 }
