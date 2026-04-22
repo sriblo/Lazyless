@@ -526,12 +526,24 @@
     font-size: 0.65rem;
     font-weight: 700;
     color: var(--text);
-    margin-bottom: 3px;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .ob-option.selected .ob-option-name { color: var(--accent); }
 
-  .ob-option-desc { font-size: 0.68rem; color: var(--muted); line-height: 1.4; }
+  .ob-option-desc {
+    font-size: 0.65rem;
+    color: var(--muted);
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
   .ob-time-list { display: flex; flex-direction: column; gap: 10px; }
 
