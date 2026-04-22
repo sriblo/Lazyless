@@ -424,6 +424,166 @@
     letter-spacing: 0.1em;
     cursor: pointer;
   }
+
+  /* ONBOARDING */
+  .ob-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    padding: 48px 24px 40px;
+    z-index: 100;
+  }
+
+  .ob-step {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    margin-bottom: 40px;
+  }
+
+  .ob-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 10px;
+  }
+
+  .ob-title span { color: var(--accent); }
+
+  .ob-sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 36px;
+  }
+
+  .ob-body { flex: 1; overflow-y: auto; }
+
+  .ob-name-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--border);
+    color: var(--text);
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    padding: 8px 0;
+    outline: none;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .ob-name-input:focus { border-bottom-color: var(--accent); }
+  .ob-name-input::placeholder { color: var(--border); }
+
+  .ob-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .ob-option {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+  }
+
+  .ob-option.selected {
+    border-color: var(--accent);
+    background: #0f1f00;
+  }
+
+  .ob-option-icon { font-size: 1.4rem; margin-bottom: 6px; }
+
+  .ob-option-name {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .ob-option.selected .ob-option-name { color: var(--accent); }
+
+  .ob-option-desc { font-size: 0.68rem; color: var(--muted); line-height: 1.4; }
+
+  .ob-time-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .ob-time-opt {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s;
+  }
+
+  .ob-time-opt.selected { border-color: var(--accent); background: #0f1f00; }
+
+  .ob-time-val {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+
+  .ob-time-label { font-size: 0.78rem; color: var(--muted); }
+
+  .ob-footer { padding-top: 24px; }
+
+  .ob-btn {
+    width: 100%;
+    padding: 18px;
+    background: var(--accent);
+    border: none;
+    border-radius: 14px;
+    color: #000;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .ob-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .ob-welcome-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -0.04em;
+    margin-bottom: 4px;
+  }
+
+  .ob-welcome-tag { font-size: 0.78rem; color: var(--muted); margin-bottom: 60px; }
+
+  .ob-ready-name {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .ob-ready-text { font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-bottom: 32px; }
 </style>
 </head>
 <body>
@@ -646,23 +806,176 @@ const SCENARIOS = {
 };
 
 // Weekly plan: each day has an array of scenario ids (or 'rest')
-const WEEK_PLAN = [
-  { label: 'ПН', name: 'Спина + Кор', scenarios: ['back', 'core'] },
-  { label: 'ВТ', name: 'Отдых', rest: true, restNote: 'Активный отдых. Погуляй по квартире, подышишь. Мышцы растут в покое.' },
-  { label: 'СР', name: 'Таз + Растяжка', scenarios: ['stretch', 'core'] },
-  { label: 'ЧТ', name: 'Отдых', rest: true, restNote: 'День отдыха. Выпей воды, расслабь приводящие если чувствуешь напряжение.' },
-  { label: 'ПТ', name: 'Сила + Выносливость', scenarios: ['force', 'endure'] },
-  { label: 'СБ', name: 'Лёгкий день', scenarios: ['stretch', 'feet'] },
-  { label: 'ВС', name: 'Отдых', rest: true, restNote: 'Полный отдых. Неделя сделана. Следующая — чуть тяжелее.' },
+// WEEK_PLAN генерируется динамически в init()
+
+// ─── ONBOARDING ──────────────────────────────────────────
+
+const GOALS = [
+  { id: 'back',    icon: '🔙', name: 'Спина',              desc: 'Поясница, осанка, позвоночник',     scenarios: ['back'] },
+  { id: 'core',    icon: '⚡', name: 'Живот и пресс',      desc: 'Укрепление, стабилизация',          scenarios: ['core'] },
+  { id: 'lower',   icon: '🫁', name: 'Нижняя часть тела',  desc: 'Таз, кровообращение, расслабление', scenarios: ['stretch', 'core'] },
+  { id: 'endure',  icon: '🏃', name: 'Выносливость',       desc: 'Сердце, дыхалка, общий тонус',      scenarios: ['endure'] },
+  { id: 'force',   icon: '💪', name: 'Сила',               desc: 'Мышцы, прогрессия нагрузки',        scenarios: ['force'] },
+  { id: 'feet',    icon: '🦶', name: 'Стопы',              desc: 'Боль при ходьбе, гиподинамия',      scenarios: ['feet'] },
 ];
+
+const TIME_OPTS = [
+  { id: 15, val: '15', label: 'минут — быстро и по делу',    slotsPerDay: 1 },
+  { id: 30, val: '30', label: 'минут — нормальная тренировка', slotsPerDay: 2 },
+  { id: 45, val: '45', label: 'минут — полноценно',           slotsPerDay: 3 },
+];
+
+let userProfile = null;
+try { userProfile = JSON.parse(localStorage.getItem('lazyless_user') || 'null'); } catch(e) {}
+
+let obState = { step: 0, name: '', goals: [], time: null };
+
+function saveProfile(profile) {
+  localStorage.setItem('lazyless_user', JSON.stringify(profile));
+  userProfile = profile;
+}
+
+function generateWeekPlan(profile) {
+  const slots = TIME_OPTS.find(t => t.id === profile.time)?.slotsPerDay || 1;
+  const pool = profile.goals.flatMap(gid => GOALS.find(g => g.id === gid)?.scenarios || []);
+  const unique = [...new Set(pool)];
+
+  // Always add stretch if not already there and time allows
+  if (!unique.includes('stretch') && slots >= 2) unique.push('stretch');
+
+  const DAYS = ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
+  const REST_NOTES = [
+    'Активный отдых. Погуляй, подыши.',
+    'День отдыха. Мышцы растут в покое.',
+    'Полный отдых. Неделя почти сделана.',
+  ];
+
+  // workout days pattern: 2 on, 1 off, 2 on, 1 off, 1 off
+  const pattern = [true, true, false, true, true, false, false];
+  let scIdx = 0;
+  let restIdx = 0;
+
+  return DAYS.map((label, i) => {
+    if (!pattern[i]) {
+      return { label, name: 'Отдых', rest: true, restNote: REST_NOTES[restIdx++ % REST_NOTES.length] };
+    }
+    const dayScenarios = [];
+    for (let s = 0; s < slots && unique.length > 0; s++) {
+      dayScenarios.push(unique[scIdx % unique.length]);
+      scIdx++;
+    }
+    const names = dayScenarios.map(id => SCENARIOS[id]?.name || id).join(' + ');
+    return { label, name: names, scenarios: dayScenarios };
+  });
+}
+
+function renderOnboarding() {
+  const el = document.getElementById('app');
+  const step = obState.step;
+
+  if (step === 0) {
+    el.innerHTML = `
+      <div class="ob-screen">
+        <div class="ob-welcome-logo">LAZYLESS</div>
+        <div class="ob-welcome-tag">домашние тренировки</div>
+        <div class="ob-title">Тренировки,<br>которые<br><span>реально помогают</span></div>
+        <div class="ob-sub">Без зала, без оборудования.<br>Настроим программу под тебя — займёт минуту.</div>
+        <div class="ob-footer" style="margin-top:auto">
+          <button class="ob-btn" onclick="obNext()">НАЧАТЬ</button>
+        </div>
+      </div>`;
+  } else if (step === 1) {
+    el.innerHTML = `
+      <div class="ob-screen">
+        <div class="ob-step">ШАГ 1 ИЗ 3</div>
+        <div class="ob-title">Как тебя<br><span>зовут?</span></div>
+        <div class="ob-body">
+          <input class="ob-name-input" id="ob-name" type="text" placeholder="Имя" autocomplete="off"
+            value="${obState.name}" oninput="obState.name=this.value" onkeydown="if(event.key==='Enter')obNext()">
+        </div>
+        <div class="ob-footer">
+          <button class="ob-btn" onclick="obNext()">ДАЛЬШЕ</button>
+        </div>
+      </div>`;
+    setTimeout(() => document.getElementById('ob-name')?.focus(), 100);
+  } else if (step === 2) {
+    el.innerHTML = `
+      <div class="ob-screen">
+        <div class="ob-step">ШАГ 2 ИЗ 3</div>
+        <div class="ob-title">Что<br><span>беспокоит?</span></div>
+        <div class="ob-sub">Выбери всё что актуально — можно несколько</div>
+        <div class="ob-body">
+          <div class="ob-grid">
+            ${GOALS.map(g => `
+              <button class="ob-option ${obState.goals.includes(g.id) ? 'selected' : ''}"
+                onclick="obToggleGoal('${g.id}')">
+                <div class="ob-option-icon">${g.icon}</div>
+                <div class="ob-option-name">${g.name}</div>
+                <div class="ob-option-desc">${g.desc}</div>
+              </button>`).join('')}
+          </div>
+        </div>
+        <div class="ob-footer">
+          <button class="ob-btn" ${obState.goals.length === 0 ? 'disabled' : ''} onclick="obNext()">ДАЛЬШЕ</button>
+        </div>
+      </div>`;
+  } else if (step === 3) {
+    el.innerHTML = `
+      <div class="ob-screen">
+        <div class="ob-step">ШАГ 3 ИЗ 3</div>
+        <div class="ob-title">Сколько<br><span>времени</span><br>есть?</div>
+        <div class="ob-body">
+          <div class="ob-time-list">
+            ${TIME_OPTS.map(t => `
+              <button class="ob-time-opt ${obState.time === t.id ? 'selected' : ''}"
+                onclick="obSelectTime(${t.id})">
+                <div class="ob-time-val">${t.val}</div>
+                <div class="ob-time-label">${t.label}</div>
+              </button>`).join('')}
+          </div>
+        </div>
+        <div class="ob-footer">
+          <button class="ob-btn" ${!obState.time ? 'disabled' : ''} onclick="obFinish()">ГОТОВО</button>
+        </div>
+      </div>`;
+  }
+}
+
+function obNext() {
+  if (obState.step === 1 && !obState.name.trim()) {
+    obState.name = 'Друг';
+  }
+  obState.step++;
+  renderOnboarding();
+}
+
+function obToggleGoal(id) {
+  const idx = obState.goals.indexOf(id);
+  if (idx >= 0) obState.goals.splice(idx, 1);
+  else obState.goals.push(id);
+  renderOnboarding();
+}
+
+function obSelectTime(id) {
+  obState.time = id;
+  renderOnboarding();
+}
+
+function obFinish() {
+  const profile = { name: obState.name.trim() || 'Друг', goals: obState.goals, time: obState.time };
+  saveProfile(profile);
+  init();
+}
 
 // ─── STATE ───────────────────────────────────────────────
 
+let WEEK_PLAN = [];
+
 let state = {
-  view: 'day',       // 'day' | 'workout'
+  view: 'day',
   dayIdx: 0,
   activeScenario: null,
-  activeContext: null, // 'plan' | 'extra'
+  activeContext: null,
 };
 
 let checked = {};
@@ -670,13 +983,20 @@ try { checked = JSON.parse(localStorage.getItem('wk3_checked') || '{}'); } catch
 
 function save() { localStorage.setItem('wk3_checked', JSON.stringify(checked)); }
 
-// Today's day index (Mon=0)
 const todayIdx = (() => {
   const d = new Date().getDay();
   return d === 0 ? 6 : d - 1;
 })();
 
-state.dayIdx = todayIdx;
+function init() {
+  if (!userProfile) {
+    renderOnboarding();
+    return;
+  }
+  WEEK_PLAN = generateWeekPlan(userProfile);
+  state.dayIdx = todayIdx;
+  render();
+}
 
 // ─── KEYS ────────────────────────────────────────────────
 
@@ -904,7 +1224,7 @@ function render() {
   app.innerHTML = state.view === 'workout' ? renderWorkoutView() : renderDayView();
 }
 
-render();
+init();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js');
