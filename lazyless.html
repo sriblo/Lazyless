@@ -305,7 +305,7 @@
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    padding: 13px 14px;
+    padding: 14px 14px 10px;
     cursor: pointer;
   }
 
@@ -331,20 +331,44 @@
   .ex-body { flex: 1; }
   .ex-name { font-weight: 500; font-size: 0.9rem; margin-bottom: 3px; }
   .ex-card.done .ex-name { color: var(--accent); }
-  .ex-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 3px; }
+  .ex-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
 
-  .tag { font-size: 0.6rem; padding: 1px 6px; border-radius: 4px; font-weight: 500; }
-  .t-back    { background: #1a1000; color: #ffaa00; }
-  .t-core    { background: #001020; color: #00aaff; }
-  .t-chest   { background: #1a001a; color: #dd00ff; }
-  .t-endure  { background: #001a10; color: #00ffaa; }
-  .t-wrist   { background: #1a0a00; color: #ff6600; }
-  .t-feet    { background: #0a001a; color: #9966ff; }
-  .t-pelvis  { background: #001a1a; color: #00ddcc; }
-  .t-stretch { background: #001a00; color: #66ff66; }
-  .t-force   { background: #1a0000; color: #ff4444; }
+  .tag {
+    font-size: 0.58rem;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .t-back, .t-core, .t-chest, .t-endure, .t-wrist,
+  .t-feet, .t-pelvis, .t-stretch, .t-force { background: transparent; color: var(--accent); }
 
-  .ex-meta { font-size: 0.74rem; color: var(--muted); }
+  .ex-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 48px;
+  }
+  .ex-stat-val {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .ex-card.done .ex-stat-val { opacity: 0.5; }
+  .ex-stat-unit {
+    font-size: 0.58rem;
+    color: var(--muted);
+    margin-top: 3px;
+    text-align: right;
+  }
 
   .hint-toggle {
     display: flex;
@@ -412,6 +436,30 @@
 <div id="app"></div>
 
 <script>
+// ─── META FORMAT ─────────────────────────────────────────
+
+function parseMeta(meta) {
+  // extract main value: "3 × 12", "~20", "10" etc.
+  const setsMatch = meta.match(/(\d+)\s*[×x]\s*(\d+)/);
+  const numMatch = meta.match(/~?(\d+)/);
+
+  let val, unit;
+  if (setsMatch) {
+    val = `${setsMatch[1]}×${setsMatch[2]}`;
+    if (/сек/.test(meta)) unit = 'сек';
+    else if (/мин/.test(meta)) unit = 'мин';
+    else unit = 'повт.';
+  } else if (numMatch) {
+    val = numMatch[0];
+    if (/мин/.test(meta)) unit = 'мин';
+    else if (/сек/.test(meta)) unit = 'сек';
+    else unit = 'подх.';
+  } else {
+    val = '—'; unit = '';
+  }
+  return { val, unit };
+}
+
 // ─── DATA ────────────────────────────────────────────────
 
 const TAGS = {
@@ -583,7 +631,7 @@ const SCENARIOS = {
       ]},
       { title: 'РАСТЯЖКА', exercises: [
         { name: 'Бабочка', tags: ['pelvis','stretch'], meta: '3 × 60 секунд',
-          hint: ['Сидишь, стопы вместе, колени в стороны','Спина прямая','НЕ дави на колени','Просто держи и дышишь — само опускается','Растягивает приводящие и тазовое дно'] },
+          hint: ['Сядь на пол, соедини стопы вместе, колени разведи в стороны','Держи за стопы руками, спина прямая','Сиди положенное время и дыши — можно слегка покачивать ногами вверх-вниз как крылья','Без резких движений'] },
         { name: 'Голубь лёжа', tags: ['pelvis','stretch'], meta: '2 × 45 сек каждая сторона',
           hint: ['Лёжа на спине','Правую лодыжку на левое колено','Подтяни левое колено к груди','Растяжение в правой ягодице и тазобедренном'] },
         { name: 'Растяжка подколенных', tags: ['stretch','back'], meta: '2 × 30 сек каждая нога',
@@ -820,6 +868,7 @@ function renderWorkoutView() {
       const isDone = !!checked[exKey(state.activeContext, state.activeScenario, si, ei)];
       const hid = `${state.activeContext}_${state.activeScenario}_${si}_${ei}`;
       const tags = ex.tags.map(t => `<span class="tag ${TAGS[t].cls}">${TAGS[t].label}</span>`).join('');
+      const { val: mVal, unit: mUnit } = parseMeta(ex.meta);
       html += `
         <div class="ex-card ${isDone ? 'done' : ''}">
           <div class="ex-main" onclick="toggleEx(${si}, ${ei})">
@@ -827,7 +876,10 @@ function renderWorkoutView() {
             <div class="ex-body">
               <div class="ex-name">${ex.name}</div>
               <div class="ex-tags">${tags}</div>
-              <div class="ex-meta">${ex.meta}</div>
+            </div>
+            <div class="ex-stat">
+              <div class="ex-stat-val">${mVal}</div>
+              <div class="ex-stat-unit">${mUnit}</div>
             </div>
           </div>
           <div class="hint-toggle" onclick="toggleHint('${hid}')">
