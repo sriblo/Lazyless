@@ -499,6 +499,9 @@
     cursor: pointer;
     text-align: left;
     transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
   }
 
   .ob-option.selected {
@@ -506,8 +509,9 @@
     background: #0f1f00;
   }
 
-  .ob-option-icon { margin-bottom: 8px; color: var(--muted); line-height: 1; }
+  .ob-option-icon { margin-bottom: 10px; color: #888; line-height: 1; }
   .ob-option.selected .ob-option-icon { color: var(--accent); }
+  .ob-option:active { transform: scale(0.97); }
 
   .sc-icon { color: var(--accent); flex-shrink: 0; line-height: 1; }
   .extra-icon { color: var(--accent); margin-bottom: 8px; line-height: 1; }
@@ -572,7 +576,12 @@
     transition: opacity 0.2s;
   }
 
-  .ob-btn:disabled { opacity: 0.3; cursor: default; }
+  .ob-btn:disabled {
+    background: var(--card);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    cursor: default;
+  }
 
   .ob-welcome-logo {
     font-family: 'Unbounded', sans-serif;
@@ -825,12 +834,12 @@ const SCENARIOS = {
 // ─── ONBOARDING ──────────────────────────────────────────
 
 const GOALS = [
-  { id: 'back',    icon: 'person-simple-walk',   name: 'Спина',             desc: 'Поясница, осанка, позвоночник',     scenarios: ['back'] },
-  { id: 'core',    icon: 'lightning',            name: 'Живот и пресс',     desc: 'Укрепление, стабилизация',          scenarios: ['core'] },
-  { id: 'lower',   icon: 'arrows-down-up',       name: 'Нижняя часть тела', desc: 'Таз, кровообращение, расслабление', scenarios: ['stretch', 'core'] },
-  { id: 'endure',  icon: 'heartbeat',            name: 'Выносливость',      desc: 'Сердце, дыхалка, общий тонус',      scenarios: ['endure'] },
-  { id: 'force',   icon: 'barbell',              name: 'Сила',              desc: 'Мышцы, прогрессия нагрузки',        scenarios: ['force'] },
-  { id: 'feet',    icon: 'sneaker-move',         name: 'Стопы',             desc: 'Боль при ходьбе, гиподинамия',      scenarios: ['feet'] },
+  { id: 'back',    icon: 'bone',               name: 'Спина',             desc: 'Болит поясница или сутулишься',   scenarios: ['back'] },
+  { id: 'core',    icon: 'target',             name: 'Живот и пресс',     desc: 'Слабый живот, нет тонуса',        scenarios: ['core'] },
+  { id: 'lower',   icon: 'person-legs',        name: 'Нижняя часть тела', desc: 'Дискомфорт в тазу, кровоток',     scenarios: ['stretch', 'core'] },
+  { id: 'endure',  icon: 'lightning',          name: 'Выносливость',      desc: 'Задыхаешься при нагрузке',        scenarios: ['endure'] },
+  { id: 'force',   icon: 'barbell',            name: 'Сила',              desc: 'Хочешь стать сильнее',            scenarios: ['force'] },
+  { id: 'feet',    icon: 'sneaker-move',       name: 'Стопы',             desc: 'Болят стопы, мало ходишь',        scenarios: ['feet'] },
 ];
 
 const TIME_OPTS = [
@@ -916,7 +925,7 @@ function renderOnboarding() {
     el.innerHTML = `
       <div class="ob-screen">
         <div class="ob-step">ШАГ 2 ИЗ 3</div>
-        <div class="ob-title">Что<br><span>беспокоит?</span></div>
+        <div class="ob-title">Что хочешь<br><span>улучшить?</span></div>
         <div class="ob-sub">Выбери всё что актуально — можно несколько</div>
         <div class="ob-body">
           <div class="ob-grid">
