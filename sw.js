@@ -1,4 +1,4 @@
-const CACHE = 'lazyless-v1';
+const CACHE = 'lazyless-v2';
 const ASSETS = [
   './lazyless.html',
   './manifest.json',
