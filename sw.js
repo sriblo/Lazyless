@@ -1,6 +1,6 @@
 const CACHE = 'lazyless-v1';
 const ASSETS = [
-  './workout3.html',
+  './lazyless.html',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;900&family=Golos+Text:wght@400;500&display=swap'
 ];

@@ -2,7 +2,7 @@
   "name": "Lazyless — тренировки",
   "short_name": "Lazyless",
   "description": "Домашние тренировки по плану",
-  "start_url": "./workout3.html",
+  "start_url": "./lazyless.html",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#c6ff00",
