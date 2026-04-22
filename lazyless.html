@@ -505,7 +505,9 @@
     background: #0f1f00;
   }
 
-  .ob-option-icon { font-size: 1.4rem; margin-bottom: 6px; }
+  .ob-option-icon { margin-bottom: 8px; color: var(--muted); }
+  .ob-option.selected .ob-option-icon { color: var(--accent); }
+  .sc-icon svg, .extra-icon svg, .ob-option-icon svg { display: block; }
 
   .ob-option-name {
     font-family: 'Unbounded', sans-serif;
@@ -596,6 +598,21 @@
 <div id="app"></div>
 
 <script>
+// ─── ICONS ───────────────────────────────────────────────
+
+const ICONS = {
+  back: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v20"/><path d="M9 5h6"/><path d="M9 9h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>`,
+  core: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="4" width="14" height="16" rx="3"/><line x1="5" y1="10" x2="19" y2="10"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="12" y1="10" x2="12" y2="20"/></svg>`,
+  lower: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 7q3-3 6-3t6 3"/><path d="M6 7c0 7 2 11 6 13 4-2 6-6 6-13"/><line x1="12" y1="7" x2="12" y2="20"/></svg>`,
+  endure: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+  force: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 10h2m14 0h-2m-5-6v2m0 12v2"/><path d="M6 10a2 2 0 0 0 2 2h8a2 2 0 0 0 0-4H8a2 2 0 0 0-2 2z"/><rect x="2" y="8.5" width="2" height="3" rx="1"/><rect x="20" y="8.5" width="2" height="3" rx="1"/></svg>`,
+  wrist: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="7" y="2" width="10" height="8" rx="3"/><path d="M7 7h10"/><rect x="5" y="12" width="14" height="5" rx="2"/><path d="M9 17v3"/><path d="M15 17v3"/></svg>`,
+  feet: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3h2v6H8z"/><path d="M14 3h2v8h-2z"/><path d="M4 11h16v3a8 8 0 0 1-16 0v-3z"/></svg>`,
+  stretch: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="4" r="2"/><path d="M5 9l7 3 7-3"/><path d="M12 12v6"/><path d="M8 21l4-3 4 3"/></svg>`,
+  rest: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+  done: `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+};
+
 // ─── META FORMAT ─────────────────────────────────────────
 
 function parseMeta(meta) {
@@ -636,7 +653,7 @@ const TAGS = {
 
 const SCENARIOS = {
   back: {
-    id: 'back', icon: '🔙', name: 'Спина', time: '~20 мин',
+    id: 'back', icon: 'back', name: 'Спина', time: '~20 мин',
     desc: 'Поясница, осанка, позвоночник',
     sections: [
       { title: 'РАЗМИНКА', exercises: [
@@ -660,7 +677,7 @@ const SCENARIOS = {
     ]
   },
   core: {
-    id: 'core', icon: '⚡', name: 'Пресс и кор', time: '~20 мин',
+    id: 'core', icon: 'core', name: 'Пресс и кор', time: '~20 мин',
     desc: 'Глубокие мышцы живота, стабилизация',
     sections: [
       { title: 'РАЗМИНКА', exercises: [
@@ -684,7 +701,7 @@ const SCENARIOS = {
     ]
   },
   endure: {
-    id: 'endure', icon: '🏃', name: 'Выносливость', time: '~25 мин',
+    id: 'endure', icon: 'endure', name: 'Выносливость', time: '~25 мин',
     desc: 'Сердечко, дыхалка, общий тонус',
     sections: [
       { title: 'РАЗМИНКА', exercises: [
@@ -708,7 +725,7 @@ const SCENARIOS = {
     ]
   },
   force: {
-    id: 'force', icon: '💪', name: 'Сила', time: '~25 мин',
+    id: 'force', icon: 'force', name: 'Сила', time: '~25 мин',
     desc: 'Мышечная масса, прогрессия нагрузки',
     sections: [
       { title: 'РАЗМИНКА', exercises: [
@@ -732,7 +749,7 @@ const SCENARIOS = {
     ]
   },
   wrist: {
-    id: 'wrist', icon: '🤝', name: 'Запястья', time: '~15 мин',
+    id: 'wrist', icon: 'wrist', name: 'Запястья', time: '~15 мин',
     desc: 'Укрепление, гибкость, профилактика',
     sections: [
       { title: 'РАЗМИНКА', exercises: [
@@ -756,7 +773,7 @@ const SCENARIOS = {
     ]
   },
   feet: {
-    id: 'feet', icon: '🦶', name: 'Стопы', time: '~15 мин',
+    id: 'feet', icon: 'feet', name: 'Стопы', time: '~15 мин',
     desc: 'Боль при ходьбе, атрофия от гиподинамии',
     sections: [
       { title: 'РАЗМИНКА', exercises: [
@@ -782,7 +799,7 @@ const SCENARIOS = {
     ]
   },
   stretch: {
-    id: 'stretch', icon: '🧘', name: 'Растяжка', time: '~20 мин',
+    id: 'stretch', icon: 'stretch', name: 'Растяжка', time: '~20 мин',
     desc: 'Таз, приводящие, спина — всё что зажато',
     sections: [
       { title: 'ДЫХАНИЕ', exercises: [
@@ -811,12 +828,12 @@ const SCENARIOS = {
 // ─── ONBOARDING ──────────────────────────────────────────
 
 const GOALS = [
-  { id: 'back',    icon: '🔙', name: 'Спина',              desc: 'Поясница, осанка, позвоночник',     scenarios: ['back'] },
-  { id: 'core',    icon: '⚡', name: 'Живот и пресс',      desc: 'Укрепление, стабилизация',          scenarios: ['core'] },
-  { id: 'lower',   icon: '🫁', name: 'Нижняя часть тела',  desc: 'Таз, кровообращение, расслабление', scenarios: ['stretch', 'core'] },
-  { id: 'endure',  icon: '🏃', name: 'Выносливость',       desc: 'Сердце, дыхалка, общий тонус',      scenarios: ['endure'] },
-  { id: 'force',   icon: '💪', name: 'Сила',               desc: 'Мышцы, прогрессия нагрузки',        scenarios: ['force'] },
-  { id: 'feet',    icon: '🦶', name: 'Стопы',              desc: 'Боль при ходьбе, гиподинамия',      scenarios: ['feet'] },
+  { id: 'back',    icon: 'back',    name: 'Спина',             desc: 'Поясница, осанка, позвоночник',     scenarios: ['back'] },
+  { id: 'core',    icon: 'core',    name: 'Живот и пресс',     desc: 'Укрепление, стабилизация',          scenarios: ['core'] },
+  { id: 'lower',   icon: 'lower',   name: 'Нижняя часть тела', desc: 'Таз, кровообращение, расслабление', scenarios: ['stretch', 'core'] },
+  { id: 'endure',  icon: 'endure',  name: 'Выносливость',      desc: 'Сердце, дыхалка, общий тонус',      scenarios: ['endure'] },
+  { id: 'force',   icon: 'force',   name: 'Сила',              desc: 'Мышцы, прогрессия нагрузки',        scenarios: ['force'] },
+  { id: 'feet',    icon: 'feet',    name: 'Стопы',             desc: 'Боль при ходьбе, гиподинамия',      scenarios: ['feet'] },
 ];
 
 const TIME_OPTS = [
@@ -909,7 +926,7 @@ function renderOnboarding() {
             ${GOALS.map(g => `
               <button class="ob-option ${obState.goals.includes(g.id) ? 'selected' : ''}"
                 onclick="obToggleGoal('${g.id}')">
-                <div class="ob-option-icon">${g.icon}</div>
+                <div class="ob-option-icon">${ICONS[g.icon] || ''}</div>
                 <div class="ob-option-name">${g.name}</div>
                 <div class="ob-option-desc">${g.desc}</div>
               </button>`).join('')}
@@ -1113,7 +1130,7 @@ function renderDayView() {
 
   if (day.rest) {
     html += `<div class="rest-card">
-      <div class="rest-emoji">🛌</div>
+      <div class="rest-emoji" style="color:var(--muted)">${ICONS.rest}</div>
       <div class="rest-title">День отдыха</div>
       <div class="rest-text">${day.restNote}</div>
     </div>`;
@@ -1129,7 +1146,7 @@ function renderDayView() {
       html += `
         <div class="plan-scenario ${allDone ? 'completed' : ''}">
           <div class="plan-scenario-header" onclick="openPlanScenario('${scId}')">
-            <div class="sc-icon">${sc.icon}</div>
+            <div class="sc-icon" style="color:var(--muted)">${ICONS[sc.icon] || ''}</div>
             <div class="sc-info">
               <div class="sc-name">${sc.name}</div>
               <div class="sc-meta">${sc.time} · ${sc.desc}</div>
@@ -1151,7 +1168,7 @@ function renderDayView() {
     const hasDone = done > 0;
     html += `
       <button class="extra-btn ${hasDone ? 'has-done' : ''}" onclick="openExtra('${sc.id}')">
-        <div class="extra-icon">${sc.icon}</div>
+        <div class="extra-icon" style="color:var(--muted)">${ICONS[sc.icon] || ''}</div>
         <div class="extra-name">${sc.name}${hasDone ? ' ·' + done + '/' + total : ''}</div>
         <div class="extra-time">${sc.time}</div>
       </button>
@@ -1171,12 +1188,12 @@ function renderWorkoutView() {
   const allDone = done === total && total > 0;
 
   let html = `<div class="back-btn" onclick="goBack()">← назад</div>`;
-  html += `<div class="progress-row"><span>${sc.icon} ${sc.name}</span><span style="color:var(--accent)">${done}/${total}</span></div>`;
+  html += `<div class="progress-row"><span style="display:flex;align-items:center;gap:6px;color:var(--muted)">${ICONS[sc.icon] || ''} ${sc.name}</span><span style="color:var(--accent)">${done}/${total}</span></div>`;
   html += `<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`;
 
   if (allDone) {
     html += `<div class="done-screen">
-      <div class="done-emoji">🔥</div>
+      <div class="done-emoji" style="color:var(--accent)">${ICONS.done}</div>
       <div class="done-title">Сделано!</div>
       <div class="done-sub">Хорошая работа. Тело скажет спасибо.</div>
     </div>`;
