@@ -917,9 +917,9 @@ function renderOnboarding() {
   } else if (step === 1) {
     el.innerHTML = `
       <div class="ob-screen">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:32px">
+          <button onclick="obBack()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.6rem;cursor:pointer;letter-spacing:0.05em;text-align:left;padding:0">← НАЗАД</button>
           <div class="ob-step" style="margin-bottom:0">ШАГ 1 ИЗ 3</div>
-          <button onclick="obBack()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.6rem;cursor:pointer;letter-spacing:0.05em">← НАЗАД</button>
         </div>
         <div class="ob-title">Как тебя<br><span>зовут?</span></div>
         <div class="ob-body">
@@ -934,9 +934,9 @@ function renderOnboarding() {
   } else if (step === 2) {
     el.innerHTML = `
       <div class="ob-screen">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:32px">
+          <button onclick="obBack()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.6rem;cursor:pointer;letter-spacing:0.05em;text-align:left;padding:0">← НАЗАД</button>
           <div class="ob-step" style="margin-bottom:0">ШАГ 2 ИЗ 3</div>
-          <button onclick="obBack()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.6rem;cursor:pointer;letter-spacing:0.05em">← НАЗАД</button>
         </div>
         <div class="ob-title">Что хочешь<br><span>улучшить?</span></div>
         <div class="ob-sub">Выбери всё что актуально — можно несколько</div>
@@ -958,9 +958,9 @@ function renderOnboarding() {
   } else if (step === 3) {
     el.innerHTML = `
       <div class="ob-screen">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:32px">
+          <button onclick="obBack()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.6rem;cursor:pointer;letter-spacing:0.05em;text-align:left;padding:0">← НАЗАД</button>
           <div class="ob-step" style="margin-bottom:0">ШАГ 3 ИЗ 3</div>
-          <button onclick="obBack()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.6rem;cursor:pointer;letter-spacing:0.05em">← НАЗАД</button>
         </div>
         <div class="ob-title">Сколько<br><span>времени</span><br>есть?</div>
         <div class="ob-body">
