@@ -775,8 +775,8 @@
 <body>
 
 <div class="app-header">
-  <div class="app-logo">LAZYLESS</div>
-  <div class="app-tagline">домашние тренировки</div>
+  <div class="app-logo" id="hdr-title">LAZYLESS</div>
+  <div class="app-tagline" id="hdr-sub">домашние тренировки</div>
 </div>
 
 <div id="app"></div>
@@ -1680,8 +1680,22 @@ function startWorkout() {
   render();
 }
 
+const SCREEN_TITLES = {
+  workout:      { title: 'LAZYLESS',    sub: 'домашние тренировки' },
+  profile:      { title: 'ПРОФИЛЬ',     sub: '' },
+  progress:     { title: 'ПРОГРЕСС',    sub: '' },
+  achievements: { title: 'УСПЕХИ',      sub: '' },
+};
+
+function setHeader(screen) {
+  const t = SCREEN_TITLES[screen] || SCREEN_TITLES.workout;
+  document.getElementById('hdr-title').textContent = t.title;
+  document.getElementById('hdr-sub').textContent = t.sub;
+}
+
 function render() {
   const app = document.getElementById('app');
+  setHeader(state.screen);
   switch (state.screen) {
     case 'profile':      app.innerHTML = renderProfile(); break;
     case 'progress':     app.innerHTML = renderPlaceholder('Прогресс', 'chart-line', 'История тренировок и стрики появятся здесь'); break;
