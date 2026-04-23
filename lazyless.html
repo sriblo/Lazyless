@@ -654,6 +654,29 @@
     transition: all 0.15s;
   }
   .wo-result-chip.target { border-color: var(--accent); color: var(--accent); }
+  .wo-custom-row { display: flex; gap: 8px; justify-content: center; margin-top: 4px; }
+  .wo-custom-input {
+    width: 100px; padding: 10px 14px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px;
+    color: var(--text); font-family: 'Unbounded', sans-serif;
+    font-size: 0.85rem; font-weight: 700; text-align: center;
+    -moz-appearance: textfield;
+  }
+  .wo-custom-input::-webkit-outer-spin-button,
+  .wo-custom-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .wo-custom-input:focus { outline: none; border-color: var(--accent); }
+  .wo-custom-btn {
+    padding: 10px 20px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px;
+    color: var(--muted); font-family: 'Unbounded', sans-serif;
+    font-size: 0.75rem; font-weight: 700; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .wo-back-btn {
+    width: 100%; padding: 14px; background: transparent; border: none;
+    color: var(--muted); font-family: 'Unbounded', sans-serif;
+    font-size: 0.7rem; letter-spacing: 0.05em; cursor: pointer; margin-top: 8px;
+  }
   .wo-complete {
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; text-align: center; min-height: calc(100vh - 80px);
@@ -1846,6 +1869,8 @@ function getWorkoutExercises() {
 }
 
 function parseExDetail(meta) {
+  const srTime = meta.match(/(\d+)\s*[×x]\s*(\d+)\s*(сек|мин)/);
+  if (srTime) return { sets: +srTime[1], seconds: srTime[3]==='мин' ? +srTime[2]*60 : +srTime[2], type: 'time' };
   const sr = meta.match(/(\d+)\s*[×x]\s*(\d+)/);
   const tm = meta.match(/(\d+)\s*(сек|мин)/);
   const nm = meta.match(/~?(\d+)/);
@@ -1853,6 +1878,23 @@ function parseExDetail(meta) {
   if (tm) return { sets: 1, seconds: tm[2]==='мин' ? +tm[1]*60 : +tm[1], type: 'time' };
   if (nm) return { sets: 1, reps: +nm[1], type: 'reps' };
   return { sets: 1, reps: 10, type: 'reps' };
+}
+
+function wsBack() {
+  const ws = workoutSession;
+  if (ws.timerInterval) { clearInterval(ws.timerInterval); ws.timerInterval = null; }
+  if (ws.phase === 'result') { ws.phase = 'ready'; ws.timerSeconds = 0; render(); return; }
+  if (ws.setIdx > 0) {
+    ws.setIdx--; ws.results.pop();
+  } else if (ws.exerciseIdx > 0) {
+    ws.exerciseIdx--;
+    const prevDet = parseExDetail(ws.exercises[ws.exerciseIdx].meta);
+    ws.setIdx = prevDet.sets - 1;
+    ws.results.pop();
+    ws.hintOpen = false;
+  } else { return; }
+  ws.phase = 'ready'; ws.timerSeconds = 0;
+  render();
 }
 
 function startWorkout() {
@@ -1965,6 +2007,10 @@ function buildActiveWorkout() {
         <div class="wo-result-row">
           ${opts.map(n=>`<button class="wo-result-chip ${n===target?'target':''}" onclick="wsFinishSet(${n})">${n}</button>`).join('')}
         </div>
+        <div class="wo-custom-row">
+          <input type="number" id="wo-custom-reps" class="wo-custom-input" placeholder="другое" min="0" max="999">
+          <button class="wo-custom-btn" onclick="const v=+document.getElementById('wo-custom-reps').value;if(v>0)wsFinishSet(v)">ОК</button>
+        </div>
       </div>`;
   } else {
     targetBlock = `<div class="wo-target">
@@ -1979,6 +2025,9 @@ function buildActiveWorkout() {
     </button>
     ${ws.hintOpen ? `<div class="wo-hint-body"><ol>${ex.hint.map(h=>`<li>${h}</li>`).join('')}</ol>${ex.warn?`<div class="wo-warn">⚠ ${ex.warn}</div>`:''}</div>` : ''}
   ` : '';
+
+  const canGoBack = ws.exerciseIdx > 0 || ws.setIdx > 0 || ws.phase === 'result';
+  const backBtn = canGoBack ? `<button class="wo-back-btn" onclick="wsBack()">← НАЗАД</button>` : '';
 
   let footerBtn = '';
   if (ws.phase === 'ready') footerBtn = `<button class="wo-start-btn" onclick="wsBegin()">НАЧАЛИ!</button>`;
@@ -1995,7 +2044,7 @@ function buildActiveWorkout() {
     <div class="wo-set-label">Подход ${ws.setIdx+1} из ${det.sets}</div>
     ${targetBlock}
     ${hint}
-    <div class="wo-footer">${footerBtn}</div>
+    <div class="wo-footer">${footerBtn}${backBtn}</div>
   </div>`;
 }
 
