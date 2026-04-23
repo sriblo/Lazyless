@@ -1344,17 +1344,17 @@ const EXERCISE_DB = [
     defaultSets:3, defaultReps:10,
     hint:['Встань в позу перевёрнутой V — таз высоко, ноги прямые','Согни локти и опусти голову между руками','Вернись в исходное'],
     warn:'Работают плечи, не грудь — следи за локтями' },
-  { id:'squat', name:'Приседания', type:'strength', difficulty:1, muscles:['warmup','quads','glutes'], equipment:[],
+  { id:'squat', name:'Приседания', type:'strength', difficulty:1, muscles:['quads','glutes'], equipment:[],
     defaultSets:3, defaultReps:15,
     hint:['Ноги на ширине плеч, носки чуть в стороны','Опускайся как на стул позади, спина прямая','Колени над носками, пятки не отрываются','Выдох на подъёме'] },
   { id:'squat_jump', name:'Прыжковые приседания', type:'cardio', difficulty:2, muscles:['quads','glutes'], equipment:[],
     defaultSets:3, defaultReps:10,
     hint:['Присядь до параллели бёдер с полом','Взрывной прыжок вверх','Мягко приземляйся на носки, сразу уходи в следующее приседание'],
     warn:'Не делай при болях в коленях' },
-  { id:'lunge', name:'Выпады', type:'strength', difficulty:1, muscles:['warmup','quads','glutes','hamstrings'], equipment:[],
+  { id:'lunge', name:'Выпады', type:'strength', difficulty:1, muscles:['quads','glutes','hamstrings'], equipment:[],
     defaultSets:3, defaultReps:12,
     hint:['Шаг вперёд, опусти заднее колено к полу — не касаясь его','Переднее колено над пяткой','Вернись и смени ногу'] },
-  { id:'lunge_reverse', name:'Обратные выпады', type:'strength', difficulty:1, muscles:['warmup','quads','glutes'], equipment:[],
+  { id:'lunge_reverse', name:'Обратные выпады', type:'strength', difficulty:1, muscles:['quads','glutes'], equipment:[],
     defaultSets:3, defaultReps:12,
     hint:['Шаг назад, опусти заднее колено','Корпус прямо','Вернись и смени ногу'],
     warn:'Мягче для коленей чем обычные выпады' },
@@ -1401,6 +1401,18 @@ const EXERCISE_DB = [
     defaultSets:3, defaultReps:12,
     hint:['На спине, руки вдоль тела или под ягодицы','Подними прямые ноги до 90°','Медленно опусти, не касаясь пола'],
     warn:'Поясница прижата к полу — не отрывается при опускании' },
+  { id:'toe_touch', name:'Касание носков', type:'strength', difficulty:1, muscles:['core'], equipment:['mat'],
+    defaultSets:3, defaultReps:15,
+    hint:['Лёжа на спине, ноги вертикально вверх','Тяни руки к носкам, отрывая лопатки','Медленно опускайся','Держи ноги прямыми'] },
+  { id:'flutter_kick', name:'Ножницы', type:'strength', difficulty:2, muscles:['core'], equipment:['mat'],
+    defaultSets:3, defaultReps:20,
+    hint:['На спине, руки под ягодицы','Поднять ноги на 30 см от пола','Попеременные движения вверх-вниз','Поясница прижата к полу'] },
+  { id:'plank_hip_dip', name:'Планка с опусканием бёдер', type:'strength', difficulty:2, muscles:['core'], equipment:['mat'],
+    defaultSets:3, defaultReps:12,
+    hint:['В позиции боковой планки на локте','Опусти таз почти до пола','Подними обратно','Не скручивай корпус'] },
+  { id:'v_sit', name:'V-образный пресс', type:'strength', difficulty:3, muscles:['core'], equipment:['mat'],
+    defaultSets:3, defaultReps:10,
+    hint:['Сидя, откинься назад под 45°','Ноги прямые, подними до уровня груди','Руки тянутся к ногам','Удержи баланс на ягодицах'] },
   { id:'superman', name:'Супермен', type:'strength', difficulty:1, muscles:['lower_back','glutes'], equipment:['mat'],
     defaultSets:3, defaultReps:12,
     hint:['Лёжа на животе, руки вперёд','Одновременно подними руки и ноги','Задержись 2-3 секунды, медленно опусти'] },
@@ -1651,7 +1663,8 @@ function pickExercises(targetMuscles, profile, count, seed) {
   const isWoman = profile.gender === 'female';
   let pool = EXERCISE_DB.filter(ex => {
     if (!canDoExercise(ex, owned)) return false;
-    if (ex.muscles.every(m => m === 'warmup')) return false;
+    if (ex.muscles.includes('warmup')) return false;
+    if (ex.type === 'stretch' && !targetMuscles.includes('stretch')) return false;
     return ex.muscles.some(m => targetMuscles.includes(m));
   });
   if (isWoman) {
