@@ -2115,6 +2115,25 @@ function renderProfileList() {
       <span class="profile-row-caret">${icon('caret-right', 16)}</span>
     </button>`;
 
+  const linkRow = (ic, label, value, action) => `
+    <button class="profile-row" onclick="${action}">
+      <span class="profile-row-icon">${icon(ic, 20)}</span>
+      <span class="profile-row-label">${label}</span>
+      <span class="profile-row-value">${value}</span>
+      <span class="profile-row-caret">${icon('caret-right', 16)}</span>
+    </button>`;
+
+  const workoutCount = (() => {
+    let total = 0;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('wk') && k.endsWith('_checked')) total++;
+      }
+    } catch(e) {}
+    return total;
+  })();
+
   return `
     <div style="padding-bottom:40px">
       ${renderProfileAvatar(pe)}
@@ -2128,6 +2147,10 @@ function renderProfileList() {
         ${row('target', 'Цели', goalsText, 'goals')}
         ${row('timer', 'Время', timeText, 'time')}
         ${row('house', 'Инвентарь', equipText, 'equipment')}
+      </div>
+      <div class="profile-group-label">ПРОГРЕСС</div>
+      <div class="profile-group">
+        ${linkRow('chart-line', 'История тренировок', workoutCount ? `${workoutCount} тренировок` : '—', "profileEditField='history';render()")}
       </div>
     </div>
     ${renderBottomNav()}`;
@@ -2177,6 +2200,28 @@ function renderProfileEditField(field) {
           ${icon(e.icon,14)} ${e.label}
         </button>`).join('')}
     </div>`;
+  } else if (field === 'history') {
+    const entries = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('wk') && k.endsWith('_checked')) entries.push(k);
+      }
+    } catch(e) {}
+    entries.sort().reverse();
+    const historyContent = entries.length
+      ? entries.map(k => {
+          const parts = k.replace('_checked','').split('_');
+          return `<div style="padding:12px 0;border-bottom:1px solid var(--border);font-size:0.8rem">${parts.join(' ')}</div>`;
+        }).join('')
+      : `<div style="color:var(--muted);text-align:center;padding:40px 0">Тренировок пока нет</div>`;
+    return `
+      <div style="padding-bottom:32px">
+        <button class="profile-back" onclick="profileEditField=null;render()">← НАЗАД</button>
+        <div style="font-family:'Unbounded',sans-serif;font-size:0.7rem;font-weight:700;color:var(--muted);margin-bottom:16px">ИСТОРИЯ</div>
+        ${historyContent}
+      </div>
+      ${renderBottomNav()}`;
   }
 
   return `
