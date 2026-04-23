@@ -581,12 +581,12 @@
   .bottom-nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 60px;
+    height: 72px;
     background: #0d0d0d;
     border-top: 1px solid var(--border);
     display: flex;
     align-items: center;
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
     z-index: 100;
     overflow: visible;
   }
@@ -600,7 +600,7 @@
     height: 100%;
     background: none;
     border: none;
-    color: #333;
+    color: #444;
     cursor: pointer;
     font-family: 'Unbounded', sans-serif;
     font-size: 0.4rem;
@@ -610,7 +610,7 @@
     padding: 0;
   }
   .nav-btn.active { color: var(--accent); }
-  .nav-btn.disabled { color: #1e1e1e; cursor: default; pointer-events: none; }
+  .nav-btn.disabled { color: #222; cursor: default; pointer-events: none; }
   .nav-btn-center {
     flex: 1;
     position: relative;
@@ -619,31 +619,32 @@
     align-items: center;
     justify-content: flex-end;
     height: 100%;
-    padding-bottom: 8px;
+    padding-bottom: 10px;
     background: none;
     border: none;
     cursor: pointer;
   }
   .nav-center-circle {
     position: absolute;
-    top: -28px;
-    width: 62px; height: 62px;
+    top: -10px;
+    width: 40px; height: 40px;
     border-radius: 50%;
     background: var(--accent);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 32px rgba(198,255,0,0.4);
+    color: #000;
+    box-shadow: 0 0 18px rgba(198,255,0,0.3);
     transition: transform 0.15s, box-shadow 0.15s;
   }
   .nav-btn-center:active .nav-center-circle {
     transform: scale(0.92);
-    box-shadow: 0 0 16px rgba(198,255,0,0.2);
+    box-shadow: 0 0 12px rgba(198,255,0,0.2);
   }
   .nav-center-label {
     font-family: 'Unbounded', sans-serif;
     font-size: 0.4rem;
     font-weight: 700;
     letter-spacing: 0.06em;
-    color: #333;
+    color: #444;
   }
 
   /* ── PROFILE ── */
@@ -1502,7 +1503,7 @@ function renderBottomNav() {
       ${icon('fork-knife', 22)}<span>ПИТАНИЕ</span>
     </button>
     <button class="nav-btn-center" onclick="switchScreen('workout')">
-      <div class="nav-center-circle">${icon('lightning', 28)}</div>
+      <div class="nav-center-circle">${icon('lightning', 20)}</div>
       <span class="nav-center-label">ТРЕНИРОВКА</span>
     </button>
     <button class="nav-btn ${s === 'achievements' ? 'active' : ''}" onclick="switchScreen('achievements')">
