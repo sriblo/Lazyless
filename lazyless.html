@@ -28,6 +28,9 @@
     padding: 12px 0 20px;
     border-bottom: 1px solid var(--border);
     margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
   }
 
   .app-logo {
@@ -44,6 +47,14 @@
     margin-top: 2px;
     letter-spacing: 0.05em;
   }
+
+  .hdr-right { text-align: right; }
+  .hdr-points {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 1rem; font-weight: 900;
+    color: var(--accent); letter-spacing: -0.02em;
+  }
+  .hdr-week { font-size: 0.62rem; color: var(--muted); margin-top: 2px; }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -672,11 +683,46 @@
     font-size: 0.75rem; font-weight: 700; cursor: pointer;
     transition: all 0.15s;
   }
-  .wo-back-btn {
-    width: 100%; padding: 14px; background: transparent; border: none;
-    color: var(--muted); font-family: 'Unbounded', sans-serif;
-    font-size: 0.7rem; letter-spacing: 0.05em; cursor: pointer; margin-top: 8px;
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 18px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-family: 'Unbounded', sans-serif;
+    font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em;
+    cursor: pointer; margin-bottom: 24px;
   }
+  .wo-back-btn {
+    flex: 1; padding: 14px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px;
+    color: var(--text); font-family: 'Unbounded', sans-serif;
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em;
+    cursor: pointer; margin-top: 10px;
+  }
+  .wo-skip-btn {
+    flex: 1; padding: 14px; background: transparent;
+    border: 1px solid #222; border-radius: 12px;
+    color: var(--muted); font-family: 'Unbounded', sans-serif;
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em;
+    cursor: pointer; margin-top: 10px;
+  }
+  .extra-section { margin-top: 28px; }
+  .extra-label {
+    font-family: 'Unbounded', sans-serif; font-size: 0.52rem;
+    color: var(--muted); letter-spacing: 0.1em; margin-bottom: 12px;
+  }
+  .extra-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .extra-btn {
+    padding: 16px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; text-align: left; cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .extra-btn:active { border-color: var(--accent); }
+  .extra-btn-icon { color: var(--muted); margin-bottom: 8px; line-height: 1; }
+  .extra-btn-name {
+    font-family: 'Unbounded', sans-serif; font-size: 0.62rem;
+    font-weight: 700; color: var(--text); margin-bottom: 3px;
+  }
+  .extra-btn-time { font-size: 0.7rem; color: var(--muted); }
   .wo-complete {
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; text-align: center; min-height: calc(100vh - 80px);
@@ -799,10 +845,12 @@
   .profile-row-value { font-size: 0.8rem; color: var(--muted); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .profile-row-caret { color: #333; flex-shrink: 0; line-height: 1; }
   .profile-back {
-    background: none; border: none;
-    color: var(--muted); font-family: 'Unbounded', sans-serif;
-    font-size: 0.6rem; cursor: pointer; letter-spacing: 0.05em;
-    padding: 0; margin-bottom: 32px; display: block;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 18px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-family: 'Unbounded', sans-serif;
+    font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em;
+    cursor: pointer; margin-bottom: 28px;
   }
   .profile-section {
     font-family: 'Unbounded', sans-serif;
@@ -915,8 +963,14 @@
 <body>
 
 <div class="app-header">
-  <div class="app-logo" id="hdr-title">LAZYLESS</div>
-  <div class="app-tagline" id="hdr-sub">домашние тренировки</div>
+  <div>
+    <div class="app-logo" id="hdr-title">LAZYLESS</div>
+    <div class="app-tagline" id="hdr-sub">домашние тренировки</div>
+  </div>
+  <div class="hdr-right" id="hdr-right" style="display:none">
+    <div class="hdr-points" id="hdr-points">⚡ 0</div>
+    <div class="hdr-week" id="hdr-week"></div>
+  </div>
 </div>
 
 <div id="app"></div>
@@ -1894,6 +1948,18 @@ function renderWorkoutHome() {
         </button>
       </div>
     </div>
+
+    <div class="extra-section">
+      <div class="extra-label">ПО НАСТРОЕНИЮ</div>
+      <div class="extra-grid">
+        ${Object.values(SCENARIOS).map(sc => `
+          <button class="extra-btn" onclick="startScenario('${sc.id}')">
+            <div class="extra-btn-icon">${icon(sc.icon, 22)}</div>
+            <div class="extra-btn-name">${sc.name}</div>
+            <div class="extra-btn-time">${sc.time}</div>
+          </button>`).join('')}
+      </div>
+    </div>
   ` + renderBottomNav();
 }
 
@@ -1925,9 +1991,7 @@ function renderWorkoutPlan() {
 
   return `
     <div style="margin-bottom:20px">
-      <button onclick="state.view='home';render()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.65rem;cursor:pointer;padding:0;letter-spacing:0.04em">
-        ← НАЗАД
-      </button>
+      <button class="btn-back" onclick="state.view='home';render()">← НАЗАД</button>
     </div>
     <div style="font-size:0.55rem;color:var(--muted);font-family:'Unbounded',sans-serif;letter-spacing:0.1em;margin-bottom:16px">${isToday ? 'СЕГОДНЯ' : day.label}</div>
     ${sectionsHtml}
@@ -1940,6 +2004,80 @@ function renderWorkoutPlan() {
 // ─── WORKOUT SESSION ─────────────────────────────────────
 
 let workoutSession = null;
+
+function getTotalPoints() {
+  let pts = 0;
+  for (let i = 0; i < 7; i++) {
+    const { done } = getDayProgress(i);
+    pts += done * 10;
+  }
+  return pts;
+}
+
+function getWeekWorkoutCount() {
+  let done = 0, total = 0;
+  WEEK_PLAN.forEach((d, i) => {
+    if (d.rest || !d.scenarios) return;
+    total++;
+    const { done: dn } = getDayProgress(i);
+    if (dn > 0) done++;
+  });
+  return { done, total };
+}
+
+function getScenarioExercises(scId) {
+  const sc = SCENARIOS[scId];
+  if (!sc) return [];
+  const list = [];
+  sc.sections.forEach(sec => sec.exercises.forEach(ex => list.push({ ...ex, scenarioName: sc.name, section: sec.title })));
+  return list;
+}
+
+function startScenario(scId) {
+  const exercises = getScenarioExercises(scId);
+  if (!exercises.length) return;
+  if (workoutSession?.timerInterval) clearInterval(workoutSession.timerInterval);
+  workoutSession = {
+    exercises, exerciseIdx: 0, setIdx: 0,
+    phase: 'ready', timerSeconds: 0,
+    timerInterval: null, hintOpen: false,
+    results: [], startTime: Date.now(),
+  };
+  state.view = 'active_workout';
+  document.querySelector('.app-header').style.display = 'none';
+  render();
+}
+
+function wsBack() {
+  const ws = workoutSession;
+  if (ws.timerInterval) { clearInterval(ws.timerInterval); ws.timerInterval = null; }
+  if (ws.phase === 'result') { ws.phase = 'ready'; ws.timerSeconds = 0; render(); return; }
+  if (ws.setIdx > 0) {
+    ws.setIdx--; ws.results.pop();
+  } else if (ws.exerciseIdx > 0) {
+    ws.exerciseIdx--;
+    const prevDet = parseExDetail(ws.exercises[ws.exerciseIdx].meta);
+    ws.setIdx = prevDet.sets - 1;
+    ws.results.pop();
+    ws.hintOpen = false;
+  } else { return; }
+  ws.phase = 'ready'; ws.timerSeconds = 0;
+  render();
+}
+
+function wsSkip() {
+  const ws = workoutSession;
+  if (ws.timerInterval) { clearInterval(ws.timerInterval); ws.timerInterval = null; }
+  const det = parseExDetail(ws.exercises[ws.exerciseIdx].meta);
+  const setsLeft = det.sets - ws.setIdx;
+  for (let i = 0; i < setsLeft; i++) ws.results.push({ exerciseIdx: ws.exerciseIdx, setIdx: ws.setIdx + i, reps: 0, skipped: true });
+  if (ws.exerciseIdx < ws.exercises.length - 1) {
+    ws.exerciseIdx++; ws.setIdx = 0; ws.phase = 'ready'; ws.timerSeconds = 0; ws.hintOpen = false;
+  } else {
+    ws.phase = 'complete';
+  }
+  render();
+}
 
 function getWorkoutExercises() {
   const day = WEEK_PLAN[state.dayIdx];
@@ -2114,7 +2252,6 @@ function buildActiveWorkout() {
   ` : '';
 
   const canGoBack = ws.exerciseIdx > 0 || ws.setIdx > 0 || ws.phase === 'result';
-  const backBtn = canGoBack ? `<button class="wo-back-btn" onclick="wsBack()">← НАЗАД</button>` : '';
 
   let footerBtn = '';
   if (ws.phase === 'ready') footerBtn = `<button class="wo-start-btn" onclick="wsBegin()">НАЧАЛИ!</button>`;
@@ -2131,7 +2268,13 @@ function buildActiveWorkout() {
     <div class="wo-set-label">Подход ${ws.setIdx+1} из ${det.sets}</div>
     ${targetBlock}
     ${hint}
-    <div class="wo-footer">${footerBtn}${backBtn}</div>
+    <div class="wo-footer">
+      ${footerBtn}
+      <div style="display:flex;gap:8px">
+        ${canGoBack ? `<button class="wo-back-btn" onclick="wsBack()">← НАЗАД</button>` : ''}
+        ${ws.phase !== 'complete' ? `<button class="wo-skip-btn" onclick="wsSkip()">ПРОПУСТИТЬ</button>` : ''}
+      </div>
+    </div>
   </div>`;
 }
 
@@ -2156,6 +2299,16 @@ function setHeader(screen) {
   }
   document.getElementById('hdr-title').textContent = title;
   document.getElementById('hdr-sub').textContent = sub;
+  const hdrRight = document.getElementById('hdr-right');
+  if (screen === 'workout') {
+    const pts = getTotalPoints();
+    const wk = getWeekWorkoutCount();
+    document.getElementById('hdr-points').textContent = `⚡ ${pts}`;
+    document.getElementById('hdr-week').textContent = `${wk.done} из ${wk.total} тренировок`;
+    hdrRight.style.display = '';
+  } else {
+    hdrRight.style.display = 'none';
+  }
 }
 
 function render() {
