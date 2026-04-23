@@ -644,6 +644,11 @@
   }
 
   /* ── PROFILE ── */
+  .avatar-wrap {
+    position: relative;
+    width: 80px; height: 80px;
+    margin: 0 auto 28px;
+  }
   .profile-avatar {
     width: 80px; height: 80px;
     border-radius: 50%;
@@ -652,17 +657,39 @@
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
     overflow: hidden;
-    position: relative;
-    margin: 0 auto 20px;
-    flex-shrink: 0;
+    color: var(--muted);
   }
   .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .avatar-edit {
-    position: absolute; bottom: 0; right: 0;
+    position: absolute; bottom: 0; right: -4px;
     background: var(--accent); color: #000;
     border-radius: 50%;
-    width: 22px; height: 22px;
+    width: 26px; height: 26px;
     display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    border: 2px solid var(--bg);
+    z-index: 2;
+  }
+  .profile-list { display: flex; flex-direction: column; gap: 2px; }
+  .profile-row {
+    display: flex; align-items: center; gap: 14px;
+    width: 100%; padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text); cursor: pointer; text-align: left;
+    transition: background 0.15s;
+  }
+  .profile-row:active { background: #1a1a1a; }
+  .profile-row-icon { color: var(--muted); flex-shrink: 0; line-height: 1; }
+  .profile-row-label { flex: 1; font-size: 0.9rem; }
+  .profile-row-value { font-size: 0.8rem; color: var(--muted); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .profile-row-caret { color: #333; flex-shrink: 0; line-height: 1; }
+  .profile-back {
+    background: none; border: none;
+    color: var(--muted); font-family: 'Unbounded', sans-serif;
+    font-size: 0.6rem; cursor: pointer; letter-spacing: 0.05em;
+    padding: 0; margin-bottom: 32px; display: block;
   }
   .profile-section {
     font-family: 'Unbounded', sans-serif;
@@ -1245,6 +1272,7 @@ let state = {
 };
 
 let profileEdit = null;
+let profileEditField = null;
 
 let checked = {};
 try { checked = JSON.parse(localStorage.getItem('wk3_checked') || '{}'); } catch(e) {}
@@ -1513,6 +1541,7 @@ function switchScreen(screen) {
       equipment: [...(userProfile.equipment || [])],
       avatar: userProfile.avatar || null,
     };
+    profileEditField = null;
   }
   state.screen = screen;
   render();
@@ -1533,12 +1562,11 @@ function profileToggleEquip(id) {
   render();
 }
 
-function saveProfileEdit() {
+function profileSaveField() {
   userProfile = { ...userProfile, ...profileEdit };
   saveProfile(userProfile);
   WEEK_PLAN = generateWeekPlan(userProfile);
-  state.screen = 'workout';
-  profileEdit = null;
+  profileEditField = null;
   render();
 }
 
@@ -1546,70 +1574,116 @@ function handleAvatarUpload(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => { profileEdit.avatar = e.target.result; render(); };
+  reader.onload = e => {
+    profileEdit.avatar = e.target.result;
+    userProfile = { ...userProfile, avatar: e.target.result };
+    saveProfile(userProfile);
+    render();
+  };
   reader.readAsDataURL(file);
 }
 
-function renderProfile() {
-  const pe = profileEdit;
+function renderProfileAvatar(pe) {
   return `
-    <div style="padding-bottom:32px">
-      <div class="profile-avatar" onclick="document.getElementById('av-input').click()">
-        ${pe.avatar ? `<img src="${pe.avatar}">` : `<span style="color:var(--muted)">${icon('user', 36)}</span>`}
-        <div class="avatar-edit">${icon('camera', 12)}</div>
+    <div style="text-align:center;margin-bottom:28px">
+      <div class="avatar-wrap">
+        <div class="profile-avatar" onclick="document.getElementById('av-input').click()">
+          ${pe.avatar ? `<img src="${pe.avatar}">` : icon('user', 36)}
+        </div>
+        <div class="avatar-edit" onclick="document.getElementById('av-input').click()">${icon('camera', 12)}</div>
       </div>
       <input type="file" id="av-input" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
+      <div style="font-family:'Unbounded',sans-serif;font-size:0.85rem;font-weight:700;margin-bottom:2px">${pe.name || '—'}</div>
+    </div>`;
+}
 
-      <div class="profile-section">ИМЯ</div>
-      <input class="profile-field" type="text" value="${pe.name || ''}"
-        oninput="profileEdit.name=this.value" placeholder="Имя">
+function renderProfileList() {
+  const pe = profileEdit;
+  const genderText = pe.gender === 'male' ? 'Мужской' : pe.gender === 'female' ? 'Женский' : '—';
+  const genderAge = [genderText !== '—' ? genderText : '', pe.age ? pe.age + ' лет' : ''].filter(Boolean).join(' · ') || '—';
+  const goalsText = (pe.goals||[]).map(id => GOALS.find(g=>g.id===id)?.name||id).join(', ') || '—';
+  const timeText = TIME_OPTS.find(t=>t.id===pe.time)?.val ? TIME_OPTS.find(t=>t.id===pe.time).val + ' мин' : '—';
+  const equipText = (pe.equipment||[]).map(id => EQUIPMENT.find(e=>e.id===id)?.label||id).join(', ') || 'Ничего';
 
-      <div class="profile-section">ПОЛ</div>
-      <div class="gender-row">
-        <button class="gender-pill ${pe.gender === 'male' ? 'selected' : ''}" onclick="profileEdit.gender='male';render()">Мужской</button>
-        <button class="gender-pill ${pe.gender === 'female' ? 'selected' : ''}" onclick="profileEdit.gender='female';render()">Женский</button>
+  const row = (ic, label, value, field) => `
+    <button class="profile-row" onclick="profileEditField='${field}';render()">
+      <span class="profile-row-icon">${icon(ic, 20)}</span>
+      <span class="profile-row-label">${label}</span>
+      <span class="profile-row-value">${value}</span>
+      <span class="profile-row-caret">${icon('caret-right', 16)}</span>
+    </button>`;
+
+  return `
+    <div style="padding-bottom:32px">
+      ${renderProfileAvatar(pe)}
+      <div class="profile-list">
+        ${row('user', 'Имя', pe.name || '—', 'name')}
+        ${row('gender-intersex', 'Пол и возраст', genderAge, 'gender_age')}
+        ${row('target', 'Цели', goalsText, 'goals')}
+        ${row('timer', 'Время', timeText, 'time')}
+        ${row('house', 'Инвентарь', equipText, 'equipment')}
       </div>
-
-      <div class="profile-section">ВОЗРАСТ</div>
-      <input class="profile-field" type="number" value="${pe.age || ''}" min="10" max="99"
-        oninput="profileEdit.age=this.value" placeholder="Лет">
-
-      <div class="profile-section">ЦЕЛИ</div>
-      <div class="ob-grid">
-        ${GOALS.map(g => `
-          <button class="ob-option ${(pe.goals||[]).includes(g.id) ? 'selected' : ''}"
-            onclick="profileToggleGoal('${g.id}')">
-            <div class="ob-option-icon">${icon(g.icon, 28)}</div>
-            <div class="ob-option-name">${g.name}</div>
-            <div class="ob-option-desc">${g.desc}</div>
-          </button>`).join('')}
-      </div>
-
-      <div class="profile-section">ВРЕМЯ ТРЕНИРОВКИ</div>
-      <div class="ob-time-list">
-        ${TIME_OPTS.map(t => `
-          <button class="ob-time-opt ${pe.time === t.id ? 'selected' : ''}"
-            onclick="profileEdit.time=${t.id};render()">
-            <div class="ob-time-val">${t.val}</div>
-            <div class="ob-time-right">
-              <div class="ob-time-unit">МИНУТ</div>
-              <div class="ob-time-label">${t.label}</div>
-            </div>
-          </button>`).join('')}
-      </div>
-
-      <div class="profile-section">ИНВЕНТАРЬ</div>
-      <div class="equip-grid">
-        ${EQUIPMENT.map(e => `
-          <button class="equip-pill ${(pe.equipment||[]).includes(e.id) ? 'selected' : ''}"
-            onclick="profileToggleEquip('${e.id}')">
-            ${icon(e.icon, 14)} ${e.label}
-          </button>`).join('')}
-      </div>
-
-      <button class="save-btn" onclick="saveProfileEdit()">СОХРАНИТЬ</button>
     </div>
     ${renderBottomNav()}`;
+}
+
+function renderProfileEditField(field) {
+  const pe = profileEdit;
+  let content = '';
+
+  if (field === 'name') {
+    content = `<input class="profile-field" type="text" value="${pe.name||''}"
+      oninput="profileEdit.name=this.value" placeholder="Имя" autofocus>`;
+  } else if (field === 'gender_age') {
+    content = `
+      <div class="profile-section">ПОЛ</div>
+      <div class="gender-row" style="margin-bottom:20px">
+        <button class="gender-pill ${pe.gender==='male'?'selected':''}" onclick="profileEdit.gender='male';render()">Мужской</button>
+        <button class="gender-pill ${pe.gender==='female'?'selected':''}" onclick="profileEdit.gender='female';render()">Женский</button>
+      </div>
+      <div class="profile-section">ВОЗРАСТ</div>
+      <input class="profile-field" type="number" value="${pe.age||''}" min="10" max="99"
+        oninput="profileEdit.age=this.value" placeholder="Лет">`;
+  } else if (field === 'goals') {
+    content = `<div class="ob-grid">
+      ${GOALS.map(g => `
+        <button class="ob-option ${(pe.goals||[]).includes(g.id)?'selected':''}" onclick="profileToggleGoal('${g.id}')">
+          <div class="ob-option-icon">${icon(g.icon,28)}</div>
+          <div class="ob-option-name">${g.name}</div>
+          <div class="ob-option-desc">${g.desc}</div>
+        </button>`).join('')}
+    </div>`;
+  } else if (field === 'time') {
+    content = `<div class="ob-time-list">
+      ${TIME_OPTS.map(t => `
+        <button class="ob-time-opt ${pe.time===t.id?'selected':''}" onclick="profileEdit.time=${t.id};render()">
+          <div class="ob-time-val">${t.val}</div>
+          <div class="ob-time-right">
+            <div class="ob-time-unit">МИНУТ</div>
+            <div class="ob-time-label">${t.label}</div>
+          </div>
+        </button>`).join('')}
+    </div>`;
+  } else if (field === 'equipment') {
+    content = `<div class="equip-grid">
+      ${EQUIPMENT.map(e => `
+        <button class="equip-pill ${(pe.equipment||[]).includes(e.id)?'selected':''}" onclick="profileToggleEquip('${e.id}')">
+          ${icon(e.icon,14)} ${e.label}
+        </button>`).join('')}
+    </div>`;
+  }
+
+  return `
+    <div style="padding-bottom:32px">
+      <button class="profile-back" onclick="profileSaveField()">← НАЗАД</button>
+      ${content}
+      <button class="save-btn" onclick="profileSaveField()">СОХРАНИТЬ</button>
+    </div>
+    ${renderBottomNav()}`;
+}
+
+function renderProfile() {
+  return profileEditField ? renderProfileEditField(profileEditField) : renderProfileList();
 }
 
 function renderPlaceholder(title, iconName, msg) {
@@ -1687,10 +1761,18 @@ const SCREEN_TITLES = {
   achievements: { title: 'УСПЕХИ',      sub: '' },
 };
 
+const FIELD_TITLES = { name: 'ИМЯ', gender_age: 'ПОЛ И ВОЗРАСТ', goals: 'ЦЕЛИ', time: 'ВРЕМЯ', equipment: 'ИНВЕНТАРЬ' };
+
 function setHeader(screen) {
-  const t = SCREEN_TITLES[screen] || SCREEN_TITLES.workout;
-  document.getElementById('hdr-title').textContent = t.title;
-  document.getElementById('hdr-sub').textContent = t.sub;
+  let title, sub;
+  if (screen === 'profile' && profileEditField) {
+    title = FIELD_TITLES[profileEditField] || 'ПРОФИЛЬ'; sub = '';
+  } else {
+    const t = SCREEN_TITLES[screen] || SCREEN_TITLES.workout;
+    title = t.title; sub = t.sub;
+  }
+  document.getElementById('hdr-title').textContent = title;
+  document.getElementById('hdr-sub').textContent = sub;
 }
 
 function render() {
