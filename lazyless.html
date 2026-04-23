@@ -1877,11 +1877,51 @@ function renderWorkoutHome() {
               ${done > 0 ? 'ПРОДОЛЖИТЬ' : 'НАЧАТЬ ТРЕНИРОВКУ'}
             </button>`
         }
-        <button onclick="state.view='workout';render()" style="width:100%;padding:14px;background:transparent;border:1px solid var(--border);border-radius:14px;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.04em;cursor:pointer">
-          СМОТРЕТЬ ПЛАН ТРЕНИРОВКИ
+        <button onclick="state.view='plan';render()" style="width:100%;padding:10px;background:transparent;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.65rem;font-weight:600;letter-spacing:0.04em;cursor:pointer;text-decoration:underline;text-underline-offset:3px">
+          смотреть план тренировки
         </button>
       </div>
     </div>
+  ` + renderBottomNav();
+}
+
+function renderWorkoutPlan() {
+  const day = WEEK_PLAN[state.dayIdx];
+  const isToday = state.dayIdx === todayIdx;
+  const sections = [];
+  (day.scenarios || []).forEach(scId => {
+    const sc = SCENARIOS[scId];
+    if (!sc) return;
+    sc.sections.forEach(sec => sections.push({ title: sec.title, exercises: sec.exercises }));
+  });
+
+  const sectionsHtml = sections.map(sec => {
+    const rows = sec.exercises.map(ex =>
+      `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid #161616">
+        <span style="font-size:0.85rem;color:var(--text)">${ex.name}</span>
+        <span style="font-size:0.72rem;color:var(--muted);white-space:nowrap;margin-left:12px;flex-shrink:0">${ex.meta}</span>
+      </div>`
+    ).join('');
+    return `<div style="margin-bottom:28px">
+      <div style="font-family:'Unbounded',sans-serif;font-size:0.55rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:8px;display:flex;justify-content:space-between">
+        <span>${sec.title}</span>
+        <span>${sec.exercises.length} упражнений</span>
+      </div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+  return `
+    <div style="margin-bottom:20px">
+      <button onclick="state.view='home';render()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.65rem;cursor:pointer;padding:0;letter-spacing:0.04em">
+        ← НАЗАД
+      </button>
+    </div>
+    <div style="font-size:0.55rem;color:var(--muted);font-family:'Unbounded',sans-serif;letter-spacing:0.1em;margin-bottom:16px">${isToday ? 'СЕГОДНЯ' : day.label}</div>
+    ${sectionsHtml}
+    <button onclick="startWorkout()" style="width:100%;padding:18px;background:var(--accent);border:none;border-radius:14px;color:#000;font-family:'Unbounded',sans-serif;font-size:0.8rem;font-weight:900;letter-spacing:0.05em;cursor:pointer;margin-bottom:8px">
+      НАЧАТЬ ТРЕНИРОВКУ
+    </button>
   ` + renderBottomNav();
 }
 
@@ -2115,6 +2155,7 @@ function render() {
     case 'achievements': app.innerHTML = renderPlaceholder('Успехи', 'trophy', 'Твои достижения и бейджи появятся здесь'); break;
     default:
       if (state.view === 'active_workout') { app.innerHTML = buildActiveWorkout(); return; }
+      else if (state.view === 'plan') app.innerHTML = renderWorkoutPlan();
       else if (state.view === 'workout') app.innerHTML = renderWorkoutView() + renderBottomNav();
       else app.innerHTML = renderWorkoutHome();
   }
