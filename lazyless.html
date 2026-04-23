@@ -1496,22 +1496,13 @@ function renderWorkoutView() {
 function renderBottomNav() {
   const s = state.screen;
   return `<nav class="bottom-nav">
-    <button class="nav-btn ${s === 'progress' ? 'active' : ''}" onclick="switchScreen('progress')">
-      ${icon('chart-line', 22)}<span>ПРОГРЕСС</span>
-    </button>
-    <button class="nav-btn disabled">
-      ${icon('fork-knife', 22)}<span>ПИТАНИЕ</span>
-    </button>
+    <button class="nav-btn ${s === 'progress' ? 'active' : ''}" onclick="switchScreen('progress')">${icon('chart-line', 22)}</button>
+    <button class="nav-btn disabled">${icon('fork-knife', 22)}</button>
     <button class="nav-btn-center" onclick="switchScreen('workout')">
       <div class="nav-center-circle">${icon('lightning', 20)}</div>
-      <span class="nav-center-label">ТРЕНИРОВКА</span>
     </button>
-    <button class="nav-btn ${s === 'achievements' ? 'active' : ''}" onclick="switchScreen('achievements')">
-      ${icon('trophy', 22)}<span>УСПЕХИ</span>
-    </button>
-    <button class="nav-btn ${s === 'profile' ? 'active' : ''}" onclick="switchScreen('profile')">
-      ${icon('user', 22)}<span>ПРОФИЛЬ</span>
-    </button>
+    <button class="nav-btn ${s === 'achievements' ? 'active' : ''}" onclick="switchScreen('achievements')">${icon('trophy', 22)}</button>
+    <button class="nav-btn ${s === 'profile' ? 'active' : ''}" onclick="switchScreen('profile')">${icon('user', 22)}</button>
   </nav>`;
 }
 
