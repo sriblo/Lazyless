@@ -527,10 +527,7 @@
     font-weight: 700;
     color: var(--text);
     margin-bottom: 4px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    min-height: calc(2 * 0.65rem * 1.4);
   }
 
   .ob-option.selected .ob-option-name { color: var(--accent); }
@@ -545,13 +542,13 @@
     overflow: hidden;
   }
 
-  .ob-time-list { display: flex; flex-direction: column; gap: 10px; }
+  .ob-time-list { display: flex; flex-direction: column; gap: 14px; }
 
   .ob-time-opt {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px 20px;
+    border-radius: 16px;
+    padding: 22px 24px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -579,6 +576,120 @@
   .ob-time-label { font-size: 0.78rem; color: var(--muted); }
 
   .ob-footer { padding-top: 24px; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #0d0d0d;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 10px 0 max(10px, env(safe-area-inset-bottom));
+    z-index: 100;
+  }
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.48rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    transition: color 0.2s;
+    padding: 0;
+  }
+  .nav-btn.active { color: var(--accent); }
+
+  /* ── PROFILE ── */
+  .profile-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    margin: 0 auto 20px;
+    flex-shrink: 0;
+  }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-edit {
+    position: absolute; bottom: 0; right: 0;
+    background: var(--accent); color: #000;
+    border-radius: 50%;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .profile-section {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin: 28px 0 12px;
+  }
+  .profile-field {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    color: var(--text);
+    font-size: 1rem;
+    font-family: 'Golos Text', sans-serif;
+    outline: none;
+  }
+  .profile-field:focus { border-color: var(--accent); }
+  .gender-row { display: flex; gap: 10px; }
+  .gender-pill {
+    flex: 1;
+    padding: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .gender-pill.selected { border-color: var(--accent); color: var(--accent); background: #0f1f00; }
+  .equip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .equip-pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-family: 'Golos Text', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .equip-pill.selected { border-color: var(--accent); color: var(--accent); background: #0f1f00; }
+  .save-btn {
+    width: 100%;
+    margin-top: 32px;
+    padding: 18px;
+    background: var(--accent);
+    border: none; border-radius: 14px;
+    color: #000;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    margin-bottom: 16px;
+  }
 
   .ob-btn {
     width: 100%;
@@ -861,6 +972,16 @@ const GOALS = [
   { id: 'feet',    icon: 'sneaker-move',        name: 'Стопы',             desc: 'Укрепляем стопы, убираем боль при ходьбе',            scenarios: ['feet'] },
 ];
 
+const EQUIPMENT = [
+  { id: 'mat',         icon: 'stack',            label: 'Коврик' },
+  { id: 'dumbbells',   icon: 'barbell',           label: 'Гантели' },
+  { id: 'pullup_bar',  icon: 'minus',             label: 'Турник' },
+  { id: 'bars',        icon: 'equals',            label: 'Брусья' },
+  { id: 'feet_anchor', icon: 'couch',             label: 'Опора для ног' },
+  { id: 'chair',       icon: 'office-chair',      label: 'Стул' },
+  { id: 'bands',       icon: 'link',              label: 'Резинки' },
+];
+
 const TIME_OPTS = [
   { id: 15, val: '15', label: 'Быстро, но лучше чем ничего',              slotsPerDay: 1 },
   { id: 30, val: '30', label: 'Достаточно чтобы почувствовать результат', slotsPerDay: 2 },
@@ -870,7 +991,7 @@ const TIME_OPTS = [
 let userProfile = null;
 try { userProfile = JSON.parse(localStorage.getItem('lazyless_user') || 'null'); } catch(e) {}
 
-let obState = { step: 0, name: '', goals: [], time: null };
+let obState = { step: 0, name: '', gender: null, age: '', goals: [], time: null, equipment: [] };
 
 function saveProfile(profile) {
   localStorage.setItem('lazyless_user', JSON.stringify(profile));
@@ -911,8 +1032,16 @@ function generateWeekPlan(profile) {
   });
 }
 
+const OB_NAV = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
+  <button onclick="obBack()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.6rem;cursor:pointer;letter-spacing:0.05em;padding:0">← НАЗАД</button>
+  <div class="ob-step" style="margin-bottom:0">ШАГ STEP_N ИЗ 5</div>
+</div>`;
+
+function obNav(n) { return OB_NAV.replace('STEP_N', n); }
+
 function renderOnboarding() {
   const el = document.getElementById('app');
+  document.querySelector('.app-header').style.display = 'none';
   const step = obState.step;
 
   if (step === 0) {
@@ -929,10 +1058,7 @@ function renderOnboarding() {
   } else if (step === 1) {
     el.innerHTML = `
       <div class="ob-screen">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
-          <button onclick="obBack()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.6rem;cursor:pointer;letter-spacing:0.05em;padding:0">← НАЗАД</button>
-          <div class="ob-step" style="margin-bottom:0">ШАГ 1 ИЗ 3</div>
-        </div>
+        ${obNav(1)}
         <div class="ob-title">Как тебя<br><span>зовут?</span></div>
         <div class="ob-body">
           <input class="ob-name-input" id="ob-name" type="text" placeholder="Имя" autocomplete="off"
@@ -946,12 +1072,28 @@ function renderOnboarding() {
   } else if (step === 2) {
     el.innerHTML = `
       <div class="ob-screen">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
-          <button onclick="obBack()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.6rem;cursor:pointer;letter-spacing:0.05em;padding:0">← НАЗАД</button>
-          <div class="ob-step" style="margin-bottom:0">ШАГ 2 ИЗ 3</div>
+        ${obNav(2)}
+        <div class="ob-title">Немного<br><span>о тебе</span></div>
+        <div class="ob-body">
+          <div class="ob-step" style="margin-bottom:8px">ПОЛ</div>
+          <div class="gender-row" style="margin-bottom:24px">
+            <button class="gender-pill ${obState.gender === 'male' ? 'selected' : ''}" onclick="obState.gender='male';renderOnboarding()">Мужской</button>
+            <button class="gender-pill ${obState.gender === 'female' ? 'selected' : ''}" onclick="obState.gender='female';renderOnboarding()">Женский</button>
+          </div>
+          <div class="ob-step" style="margin-bottom:8px">ВОЗРАСТ</div>
+          <input class="ob-name-input" type="number" placeholder="Лет" min="10" max="99"
+            value="${obState.age}" oninput="obState.age=this.value" style="font-size:1.4rem">
         </div>
+        <div class="ob-footer">
+          <button class="ob-btn" onclick="obNext()">ДАЛЬШЕ</button>
+        </div>
+      </div>`;
+  } else if (step === 3) {
+    el.innerHTML = `
+      <div class="ob-screen">
+        ${obNav(3)}
         <div class="ob-title">Что хочешь<br><span>улучшить?</span></div>
-        <div class="ob-sub">Выбери всё что актуально — можно несколько</div>
+        <div class="ob-sub">Отметь всё, что хочешь проработать</div>
         <div class="ob-body">
           <div class="ob-grid">
             ${GOALS.map(g => `
@@ -967,14 +1109,11 @@ function renderOnboarding() {
           <button class="ob-btn" ${obState.goals.length === 0 ? 'disabled' : ''} onclick="obNext()">ДАЛЬШЕ</button>
         </div>
       </div>`;
-  } else if (step === 3) {
+  } else if (step === 4) {
     el.innerHTML = `
       <div class="ob-screen">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
-          <button onclick="obBack()" style="background:none;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.6rem;cursor:pointer;letter-spacing:0.05em;padding:0">← НАЗАД</button>
-          <div class="ob-step" style="margin-bottom:0">ШАГ 3 ИЗ 3</div>
-        </div>
-        <div class="ob-title">Сколько<br><span>времени</span><br>есть?</div>
+        ${obNav(4)}
+        <div class="ob-title">Сколько минут<br><span>в день?</span></div>
         <div class="ob-body">
           <div class="ob-time-list">
             ${TIME_OPTS.map(t => `
@@ -982,14 +1121,33 @@ function renderOnboarding() {
                 onclick="obSelectTime(${t.id})">
                 <div class="ob-time-val">${t.val}</div>
                 <div class="ob-time-right">
-                  <div class="ob-time-unit">МИН</div>
+                  <div class="ob-time-unit">МИНУТ</div>
                   <div class="ob-time-label">${t.label}</div>
                 </div>
               </button>`).join('')}
           </div>
         </div>
         <div class="ob-footer">
-          <button class="ob-btn" ${!obState.time ? 'disabled' : ''} onclick="obFinish()">ГОТОВО</button>
+          <button class="ob-btn" ${!obState.time ? 'disabled' : ''} onclick="obNext()">ДАЛЬШЕ</button>
+        </div>
+      </div>`;
+  } else if (step === 5) {
+    el.innerHTML = `
+      <div class="ob-screen">
+        ${obNav(5)}
+        <div class="ob-title">Что есть<br><span>дома?</span></div>
+        <div class="ob-sub">Отметь что есть — план подстроится</div>
+        <div class="ob-body">
+          <div class="equip-grid">
+            ${EQUIPMENT.map(e => `
+              <button class="equip-pill ${obState.equipment.includes(e.id) ? 'selected' : ''}"
+                onclick="obToggleEquip('${e.id}')">
+                ${icon(e.icon, 15)} ${e.label}
+              </button>`).join('')}
+          </div>
+        </div>
+        <div class="ob-footer">
+          <button class="ob-btn" onclick="obFinish()">ГОТОВО</button>
         </div>
       </div>`;
   }
@@ -1017,8 +1175,22 @@ function obSelectTime(id) {
   renderOnboarding();
 }
 
+function obToggleEquip(id) {
+  const idx = obState.equipment.indexOf(id);
+  if (idx >= 0) obState.equipment.splice(idx, 1);
+  else obState.equipment.push(id);
+  renderOnboarding();
+}
+
 function obFinish() {
-  const profile = { name: obState.name.trim() || 'Друг', goals: obState.goals, time: obState.time };
+  const profile = {
+    name: obState.name.trim(),
+    gender: obState.gender,
+    age: obState.age ? parseInt(obState.age) : null,
+    goals: obState.goals,
+    time: obState.time,
+    equipment: obState.equipment,
+  };
   saveProfile(profile);
   init();
 }
@@ -1028,11 +1200,14 @@ function obFinish() {
 let WEEK_PLAN = [];
 
 let state = {
+  screen: 'workout',
   view: 'day',
   dayIdx: 0,
   activeScenario: null,
   activeContext: null,
 };
+
+let profileEdit = null;
 
 let checked = {};
 try { checked = JSON.parse(localStorage.getItem('wk3_checked') || '{}'); } catch(e) {}
@@ -1051,6 +1226,8 @@ function init() {
   }
   WEEK_PLAN = generateWeekPlan(userProfile);
   state.dayIdx = todayIdx;
+  state.screen = 'workout';
+  document.querySelector('.app-header').style.display = '';
   render();
 }
 
@@ -1275,9 +1452,137 @@ function renderWorkoutView() {
   return html;
 }
 
+function renderBottomNav() {
+  const s = state.screen;
+  return `<nav class="bottom-nav">
+    <button class="nav-btn ${s === 'workout' ? 'active' : ''}" onclick="switchScreen('workout')">
+      ${icon('lightning', 22)}<span>ТРЕНИРОВКА</span>
+    </button>
+    <button class="nav-btn ${s === 'profile' ? 'active' : ''}" onclick="switchScreen('profile')">
+      ${icon('user', 22)}<span>ПРОФИЛЬ</span>
+    </button>
+  </nav>`;
+}
+
+function switchScreen(screen) {
+  if (screen === 'profile') {
+    profileEdit = {
+      name: userProfile.name || '',
+      gender: userProfile.gender || null,
+      age: userProfile.age || '',
+      goals: [...(userProfile.goals || [])],
+      time: userProfile.time || null,
+      equipment: [...(userProfile.equipment || [])],
+      avatar: userProfile.avatar || null,
+    };
+  }
+  state.screen = screen;
+  render();
+}
+
+function profileToggleGoal(id) {
+  const idx = profileEdit.goals.indexOf(id);
+  if (idx >= 0) profileEdit.goals.splice(idx, 1);
+  else profileEdit.goals.push(id);
+  render();
+}
+
+function profileToggleEquip(id) {
+  if (!profileEdit.equipment) profileEdit.equipment = [];
+  const idx = profileEdit.equipment.indexOf(id);
+  if (idx >= 0) profileEdit.equipment.splice(idx, 1);
+  else profileEdit.equipment.push(id);
+  render();
+}
+
+function saveProfileEdit() {
+  userProfile = { ...userProfile, ...profileEdit };
+  saveProfile(userProfile);
+  WEEK_PLAN = generateWeekPlan(userProfile);
+  state.screen = 'workout';
+  profileEdit = null;
+  render();
+}
+
+function handleAvatarUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { profileEdit.avatar = e.target.result; render(); };
+  reader.readAsDataURL(file);
+}
+
+function renderProfile() {
+  const pe = profileEdit;
+  return `
+    <div style="padding-bottom:32px">
+      <div class="profile-avatar" onclick="document.getElementById('av-input').click()">
+        ${pe.avatar ? `<img src="${pe.avatar}">` : `<span style="color:var(--muted)">${icon('user', 36)}</span>`}
+        <div class="avatar-edit">${icon('camera', 12)}</div>
+      </div>
+      <input type="file" id="av-input" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
+
+      <div class="profile-section">ИМЯ</div>
+      <input class="profile-field" type="text" value="${pe.name || ''}"
+        oninput="profileEdit.name=this.value" placeholder="Имя">
+
+      <div class="profile-section">ПОЛ</div>
+      <div class="gender-row">
+        <button class="gender-pill ${pe.gender === 'male' ? 'selected' : ''}" onclick="profileEdit.gender='male';render()">Мужской</button>
+        <button class="gender-pill ${pe.gender === 'female' ? 'selected' : ''}" onclick="profileEdit.gender='female';render()">Женский</button>
+      </div>
+
+      <div class="profile-section">ВОЗРАСТ</div>
+      <input class="profile-field" type="number" value="${pe.age || ''}" min="10" max="99"
+        oninput="profileEdit.age=this.value" placeholder="Лет">
+
+      <div class="profile-section">ЦЕЛИ</div>
+      <div class="ob-grid">
+        ${GOALS.map(g => `
+          <button class="ob-option ${(pe.goals||[]).includes(g.id) ? 'selected' : ''}"
+            onclick="profileToggleGoal('${g.id}')">
+            <div class="ob-option-icon">${icon(g.icon, 28)}</div>
+            <div class="ob-option-name">${g.name}</div>
+            <div class="ob-option-desc">${g.desc}</div>
+          </button>`).join('')}
+      </div>
+
+      <div class="profile-section">ВРЕМЯ ТРЕНИРОВКИ</div>
+      <div class="ob-time-list">
+        ${TIME_OPTS.map(t => `
+          <button class="ob-time-opt ${pe.time === t.id ? 'selected' : ''}"
+            onclick="profileEdit.time=${t.id};render()">
+            <div class="ob-time-val">${t.val}</div>
+            <div class="ob-time-right">
+              <div class="ob-time-unit">МИНУТ</div>
+              <div class="ob-time-label">${t.label}</div>
+            </div>
+          </button>`).join('')}
+      </div>
+
+      <div class="profile-section">ИНВЕНТАРЬ</div>
+      <div class="equip-grid">
+        ${EQUIPMENT.map(e => `
+          <button class="equip-pill ${(pe.equipment||[]).includes(e.id) ? 'selected' : ''}"
+            onclick="profileToggleEquip('${e.id}')">
+            ${icon(e.icon, 14)} ${e.label}
+          </button>`).join('')}
+      </div>
+
+      <button class="save-btn" onclick="saveProfileEdit()">СОХРАНИТЬ</button>
+    </div>
+    ${renderBottomNav()}`;
+}
+
 function render() {
   const app = document.getElementById('app');
-  app.innerHTML = state.view === 'workout' ? renderWorkoutView() : renderDayView();
+  if (state.screen === 'profile') {
+    app.innerHTML = renderProfile();
+  } else if (state.view === 'workout') {
+    app.innerHTML = renderWorkoutView() + renderBottomNav();
+  } else {
+    app.innerHTML = renderDayView() + renderBottomNav();
+  }
 }
 
 init();
