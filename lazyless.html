@@ -577,6 +577,88 @@
 
   .ob-footer { padding-top: 24px; }
 
+  /* ── ACTIVE WORKOUT ── */
+  .wo-screen {
+    display: flex; flex-direction: column;
+    min-height: calc(100vh - 80px);
+  }
+  .wo-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .wo-exit {
+    background: none; border: none; color: var(--muted);
+    font-size: 1.1rem; cursor: pointer; padding: 4px; line-height: 1;
+  }
+  .wo-counter {
+    font-family: 'Unbounded', sans-serif; font-size: 0.6rem;
+    font-weight: 700; color: var(--muted); letter-spacing: 0.05em;
+  }
+  .wo-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 36px; }
+  .wo-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s; }
+  .wo-section-tag {
+    font-size: 0.5rem; color: var(--muted); font-family: 'Unbounded', sans-serif;
+    letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+  .wo-name {
+    font-family: 'Unbounded', sans-serif; font-size: 1.25rem;
+    font-weight: 900; line-height: 1.2; margin-bottom: 8px;
+  }
+  .wo-set-label { color: var(--muted); font-size: 0.82rem; margin-bottom: 36px; }
+  .wo-target { text-align: center; margin-bottom: 36px; }
+  .wo-big-num {
+    font-family: 'Unbounded', sans-serif; font-size: 5rem;
+    font-weight: 900; color: var(--accent); line-height: 1;
+  }
+  .wo-big-unit {
+    font-family: 'Unbounded', sans-serif; font-size: 0.65rem;
+    color: var(--muted); letter-spacing: 0.1em; margin-top: 6px;
+  }
+  .wo-hint-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: none; border: none; color: var(--muted);
+    font-size: 0.82rem; cursor: pointer; padding: 0; margin-bottom: 14px;
+  }
+  .wo-hint-body {
+    background: var(--card); border-radius: 14px;
+    padding: 16px; margin-bottom: 16px;
+  }
+  .wo-hint-body ol { padding-left: 18px; color: var(--muted); font-size: 0.85rem; line-height: 1.7; }
+  .wo-warn { color: #f0a500; font-size: 0.8rem; margin-top: 10px; }
+  .wo-footer { margin-top: auto; padding-top: 16px; }
+  .wo-start-btn {
+    width: 100%; padding: 22px;
+    background: var(--accent); border: none; border-radius: 16px;
+    color: #000; font-family: 'Unbounded', sans-serif;
+    font-size: 0.9rem; font-weight: 900; letter-spacing: 0.06em; cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .wo-start-btn:active { transform: scale(0.97); }
+  .wo-done-btn {
+    width: 100%; padding: 22px;
+    background: transparent; border: 2px solid var(--accent);
+    border-radius: 16px; color: var(--accent);
+    font-family: 'Unbounded', sans-serif; font-size: 0.9rem;
+    font-weight: 900; letter-spacing: 0.06em; cursor: pointer;
+  }
+  .wo-result-q {
+    font-family: 'Unbounded', sans-serif; font-size: 0.6rem;
+    color: var(--muted); letter-spacing: 0.08em; text-align: center; margin-bottom: 16px;
+  }
+  .wo-result-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px; }
+  .wo-result-chip {
+    padding: 12px 18px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px;
+    color: var(--text); font-family: 'Unbounded', sans-serif;
+    font-size: 0.85rem; font-weight: 700; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .wo-result-chip.target { border-color: var(--accent); color: var(--accent); }
+  .wo-complete {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center; min-height: calc(100vh - 80px);
+  }
+
   /* ── BOTTOM NAV ── */
   .bottom-nav {
     position: fixed;
@@ -1745,14 +1827,179 @@ function renderWorkoutHome() {
   return weekStrip + card + renderBottomNav();
 }
 
-function startWorkout() {
+// ─── WORKOUT SESSION ─────────────────────────────────────
+
+let workoutSession = null;
+
+function getWorkoutExercises() {
   const day = WEEK_PLAN[state.dayIdx];
-  if (!day.scenarios?.length) return;
-  state.view = 'workout';
-  state.activeScenario = day.scenarios[0];
-  state.activeContext = 'plan_' + state.dayIdx;
+  if (!day.scenarios) return [];
+  const list = [];
+  day.scenarios.forEach(scId => {
+    const sc = SCENARIOS[scId];
+    if (!sc) return;
+    sc.sections.forEach(sec => {
+      sec.exercises.forEach(ex => list.push({ ...ex, scenarioName: sc.name, section: sec.title }));
+    });
+  });
+  return list;
+}
+
+function parseExDetail(meta) {
+  const sr = meta.match(/(\d+)\s*[×x]\s*(\d+)/);
+  const tm = meta.match(/(\d+)\s*(сек|мин)/);
+  const nm = meta.match(/~?(\d+)/);
+  if (sr) return { sets: +sr[1], reps: +sr[2], type: 'reps' };
+  if (tm) return { sets: 1, seconds: tm[2]==='мин' ? +tm[1]*60 : +tm[1], type: 'time' };
+  if (nm) return { sets: 1, reps: +nm[1], type: 'reps' };
+  return { sets: 1, reps: 10, type: 'reps' };
+}
+
+function startWorkout() {
+  const exercises = getWorkoutExercises();
+  if (!exercises.length) return;
+  if (workoutSession?.timerInterval) clearInterval(workoutSession.timerInterval);
+  workoutSession = {
+    exercises, exerciseIdx: 0, setIdx: 0,
+    phase: 'ready', timerSeconds: 0,
+    timerInterval: null, hintOpen: false,
+    results: [], startTime: Date.now(),
+  };
+  state.view = 'active_workout';
+  document.querySelector('.app-header').style.display = 'none';
   render();
 }
+
+function wsBegin() {
+  const det = parseExDetail(workoutSession.exercises[workoutSession.exerciseIdx].meta);
+  workoutSession.phase = 'active';
+  workoutSession.timerSeconds = det.type === 'time' ? det.seconds : 0;
+  workoutSession.timerInterval = setInterval(() => {
+    if (det.type === 'time') {
+      workoutSession.timerSeconds--;
+      if (workoutSession.timerSeconds <= 0) {
+        clearInterval(workoutSession.timerInterval);
+        workoutSession.timerInterval = null;
+        wsFinishSet(det.seconds);
+        return;
+      }
+    } else {
+      workoutSession.timerSeconds++;
+    }
+    const app = document.getElementById('app');
+    if (app) app.innerHTML = buildActiveWorkout();
+  }, 1000);
+  render();
+}
+
+function wsDone() {
+  const det = parseExDetail(workoutSession.exercises[workoutSession.exerciseIdx].meta);
+  if (workoutSession.timerInterval) { clearInterval(workoutSession.timerInterval); workoutSession.timerInterval = null; }
+  if (det.type === 'time') { wsFinishSet(det.seconds); return; }
+  workoutSession.phase = 'result';
+  workoutSession._det = det;
+  render();
+}
+
+function wsFinishSet(reps) {
+  const ws = workoutSession;
+  ws.results.push({ exerciseIdx: ws.exerciseIdx, setIdx: ws.setIdx, reps });
+  const det = parseExDetail(ws.exercises[ws.exerciseIdx].meta);
+  if (ws.setIdx < det.sets - 1) {
+    ws.setIdx++; ws.phase = 'ready'; ws.timerSeconds = 0;
+  } else if (ws.exerciseIdx < ws.exercises.length - 1) {
+    ws.exerciseIdx++; ws.setIdx = 0; ws.phase = 'ready'; ws.timerSeconds = 0; ws.hintOpen = false;
+  } else {
+    ws.phase = 'complete';
+  }
+  render();
+}
+
+function wsExit() {
+  if (workoutSession?.timerInterval) clearInterval(workoutSession.timerInterval);
+  workoutSession = null;
+  state.view = 'home';
+  document.querySelector('.app-header').style.display = '';
+  render();
+}
+
+function buildActiveWorkout() {
+  const ws = workoutSession;
+  if (ws.phase === 'complete') {
+    const mins = Math.round((Date.now() - ws.startTime) / 60000);
+    return `<div class="wo-complete">
+      <div style="color:var(--accent);margin-bottom:24px">${icon('check-fat', 64)}</div>
+      <div style="font-family:'Unbounded',sans-serif;font-size:1.5rem;font-weight:900;margin-bottom:8px">ГОТОВО!</div>
+      <div style="color:var(--muted);font-size:0.85rem;margin-bottom:40px">${ws.exercises.length} упражнений · ${mins || 1} мин</div>
+      <button class="wo-start-btn" style="max-width:280px" onclick="wsExit()">ЗАВЕРШИТЬ</button>
+    </div>`;
+  }
+
+  const ex = ws.exercises[ws.exerciseIdx];
+  const det = parseExDetail(ex.meta);
+  const pct = Math.round((ws.exerciseIdx / ws.exercises.length) * 100);
+  const m = Math.floor(Math.abs(ws.timerSeconds)/60);
+  const s = Math.abs(ws.timerSeconds)%60;
+  const timeStr = `${m}:${s.toString().padStart(2,'0')}`;
+
+  let bigNum = '', bigUnit = '';
+  if (ws.phase === 'ready') {
+    if (det.type === 'time') {
+      const tm = Math.floor(det.seconds/60), ts = det.seconds%60;
+      bigNum = tm > 0 ? `${tm}:${ts.toString().padStart(2,'0')}` : det.seconds;
+      bigUnit = 'сек';
+    } else { bigNum = det.reps; bigUnit = 'повт.'; }
+  } else if (ws.phase === 'active') {
+    bigNum = timeStr;
+    bigUnit = det.type === 'time' ? 'осталось' : 'прошло';
+  }
+
+  let targetBlock = '';
+  if (ws.phase === 'result') {
+    const target = det.reps || 10;
+    const opts = [];
+    for (let i = Math.max(1, target-3); i <= target+3; i++) opts.push(i);
+    targetBlock = `
+      <div class="wo-target">
+        <div class="wo-result-q">СКОЛЬКО СДЕЛАЛ?</div>
+        <div class="wo-result-row">
+          ${opts.map(n=>`<button class="wo-result-chip ${n===target?'target':''}" onclick="wsFinishSet(${n})">${n}</button>`).join('')}
+        </div>
+      </div>`;
+  } else {
+    targetBlock = `<div class="wo-target">
+      <div class="wo-big-num">${bigNum}</div>
+      <div class="wo-big-unit">${bigUnit}</div>
+    </div>`;
+  }
+
+  const hint = ex.hint ? `
+    <button class="wo-hint-btn" onclick="workoutSession.hintOpen=!workoutSession.hintOpen;document.getElementById('app').innerHTML=buildActiveWorkout()">
+      ${icon(ws.hintOpen?'caret-up':'caret-down', 14)} Как делать
+    </button>
+    ${ws.hintOpen ? `<div class="wo-hint-body"><ol>${ex.hint.map(h=>`<li>${h}</li>`).join('')}</ol>${ex.warn?`<div class="wo-warn">⚠ ${ex.warn}</div>`:''}</div>` : ''}
+  ` : '';
+
+  let footerBtn = '';
+  if (ws.phase === 'ready') footerBtn = `<button class="wo-start-btn" onclick="wsBegin()">НАЧАЛИ!</button>`;
+  else if (ws.phase === 'active') footerBtn = `<button class="wo-done-btn" onclick="wsDone()">ГОТОВО</button>`;
+
+  return `<div class="wo-screen">
+    <div class="wo-top">
+      <button class="wo-exit" onclick="wsExit()">${icon('x', 20)}</button>
+      <div class="wo-counter">${ws.exerciseIdx+1} / ${ws.exercises.length}</div>
+    </div>
+    <div class="wo-bar"><div class="wo-bar-fill" style="width:${pct}%"></div></div>
+    <div class="wo-section-tag">${ex.section}</div>
+    <div class="wo-name">${ex.name}</div>
+    <div class="wo-set-label">Подход ${ws.setIdx+1} из ${det.sets}</div>
+    ${targetBlock}
+    ${hint}
+    <div class="wo-footer">${footerBtn}</div>
+  </div>`;
+}
+
+function renderActiveWorkout() { return buildActiveWorkout(); }
 
 const SCREEN_TITLES = {
   workout:      { title: 'LAZYLESS',    sub: 'домашние тренировки' },
@@ -1783,7 +2030,8 @@ function render() {
     case 'progress':     app.innerHTML = renderPlaceholder('Прогресс', 'chart-line', 'История тренировок и стрики появятся здесь'); break;
     case 'achievements': app.innerHTML = renderPlaceholder('Успехи', 'trophy', 'Твои достижения и бейджи появятся здесь'); break;
     default:
-      if (state.view === 'workout') app.innerHTML = renderWorkoutView() + renderBottomNav();
+      if (state.view === 'active_workout') { app.innerHTML = buildActiveWorkout(); return; }
+      else if (state.view === 'workout') app.innerHTML = renderWorkoutView() + renderBottomNav();
       else app.innerHTML = renderWorkoutHome();
   }
 }
