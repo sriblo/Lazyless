@@ -2022,7 +2022,7 @@ function renderWorkoutView() {
 function renderBottomNav() {
   const s = state.screen;
   return `<nav class="bottom-nav">
-    <button class="nav-btn ${s === 'exercises' ? 'active' : ''}" onclick="switchScreen('exercises')">${icon('books', 22)}</button>
+    <button class="nav-btn ${s === 'exercises' ? 'active' : ''}" onclick="switchScreen('exercises')">${icon('notebook', 22)}</button>
     <button class="nav-btn disabled">${icon('fork-knife', 22)}</button>
     <button class="nav-btn-center" onclick="switchScreen('workout')">
       <div class="nav-center-circle">${icon('barbell', 20)}</div>
