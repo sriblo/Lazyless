@@ -775,20 +775,28 @@
     border: 2px solid var(--bg);
     z-index: 2;
   }
-  .profile-list { display: flex; flex-direction: column; gap: 2px; }
+  .profile-group-label {
+    font-family: 'Unbounded', sans-serif; font-size: 0.5rem;
+    color: var(--muted); letter-spacing: 0.1em; margin: 24px 4px 8px;
+  }
+  .profile-group {
+    background: var(--card); border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .profile-list { display: flex; flex-direction: column; gap: 0; }
   .profile-row {
     display: flex; align-items: center; gap: 14px;
     width: 100%; padding: 16px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
+    background: transparent;
+    border: none; border-bottom: 1px solid var(--border);
     color: var(--text); cursor: pointer; text-align: left;
     transition: background 0.15s;
   }
+  .profile-row:last-child { border-bottom: none; }
   .profile-row:active { background: #1a1a1a; }
   .profile-row-icon { color: var(--muted); flex-shrink: 0; line-height: 1; }
   .profile-row-label { flex: 1; font-size: 0.9rem; }
-  .profile-row-value { font-size: 0.8rem; color: var(--muted); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .profile-row-value { font-size: 0.8rem; color: var(--muted); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .profile-row-caret { color: #333; flex-shrink: 0; line-height: 1; }
   .profile-back {
     background: none; border: none;
@@ -1707,7 +1715,7 @@ function renderProfileList() {
   const genderText = pe.gender === 'male' ? 'Мужской' : pe.gender === 'female' ? 'Женский' : '—';
   const genderAge = [genderText !== '—' ? genderText : '', pe.age ? pe.age + ' лет' : ''].filter(Boolean).join(' · ') || '—';
   const goalsText = (pe.goals||[]).map(id => GOALS.find(g=>g.id===id)?.name||id).join(', ') || '—';
-  const timeText = TIME_OPTS.find(t=>t.id===pe.time)?.val ? TIME_OPTS.find(t=>t.id===pe.time).val + ' мин' : '—';
+  const timeText = TIME_OPTS.find(t=>t.id===pe.time)?.val ? TIME_OPTS.find(t=>t.id===pe.time).val + ' минут' : '—';
   const equipText = (pe.equipment||[]).map(id => EQUIPMENT.find(e=>e.id===id)?.label||id).join(', ') || 'Ничего';
 
   const row = (ic, label, value, field) => `
@@ -1719,11 +1727,15 @@ function renderProfileList() {
     </button>`;
 
   return `
-    <div style="padding-bottom:32px">
+    <div style="padding-bottom:40px">
       ${renderProfileAvatar(pe)}
-      <div class="profile-list">
+      <div class="profile-group-label">ЛИЧНЫЕ ДАННЫЕ</div>
+      <div class="profile-group">
         ${row('user', 'Имя', pe.name || '—', 'name')}
         ${row('gender-intersex', 'Пол и возраст', genderAge, 'gender_age')}
+      </div>
+      <div class="profile-group-label">ТРЕНИРОВКИ</div>
+      <div class="profile-group">
         ${row('target', 'Цели', goalsText, 'goals')}
         ${row('timer', 'Время', timeText, 'time')}
         ${row('house', 'Инвентарь', equipText, 'equipment')}
@@ -2064,8 +2076,8 @@ function buildActiveWorkout() {
     if (det.type === 'time') {
       const tm = Math.floor(det.seconds/60), ts = det.seconds%60;
       bigNum = tm > 0 ? `${tm}:${ts.toString().padStart(2,'0')}` : det.seconds;
-      bigUnit = 'сек';
-    } else { bigNum = det.reps; bigUnit = 'повт.'; }
+      bigUnit = 'секунд';
+    } else { bigNum = det.reps; bigUnit = 'повторений'; }
   } else if (ws.phase === 'active') {
     bigNum = timeStr;
     bigUnit = det.type === 'time' ? 'осталось' : 'прошло';
