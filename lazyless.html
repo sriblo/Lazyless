@@ -1296,17 +1296,17 @@ const EXERCISE_DB = [
     defaultSets:3, defaultReps:10,
     hint:['Встань в позу перевёрнутой V — таз высоко, ноги прямые','Согни локти и опусти голову между руками','Вернись в исходное'],
     warn:'Работают плечи, не грудь — следи за локтями' },
-  { id:'squat', name:'Приседания', type:'strength', difficulty:1, muscles:['quads','glutes'], equipment:[],
+  { id:'squat', name:'Приседания', type:'strength', difficulty:1, muscles:['warmup','quads','glutes'], equipment:[],
     defaultSets:3, defaultReps:15,
     hint:['Ноги на ширине плеч, носки чуть в стороны','Опускайся как на стул позади, спина прямая','Колени над носками, пятки не отрываются','Выдох на подъёме'] },
   { id:'squat_jump', name:'Прыжковые приседания', type:'cardio', difficulty:2, muscles:['quads','glutes'], equipment:[],
     defaultSets:3, defaultReps:10,
     hint:['Присядь до параллели бёдер с полом','Взрывной прыжок вверх','Мягко приземляйся на носки, сразу уходи в следующее приседание'],
     warn:'Не делай при болях в коленях' },
-  { id:'lunge', name:'Выпады', type:'strength', difficulty:1, muscles:['quads','glutes','hamstrings'], equipment:[],
+  { id:'lunge', name:'Выпады', type:'strength', difficulty:1, muscles:['warmup','quads','glutes','hamstrings'], equipment:[],
     defaultSets:3, defaultReps:12,
     hint:['Шаг вперёд, опусти заднее колено к полу — не касаясь его','Переднее колено над пяткой','Вернись и смени ногу'] },
-  { id:'lunge_reverse', name:'Обратные выпады', type:'strength', difficulty:1, muscles:['quads','glutes'], equipment:[],
+  { id:'lunge_reverse', name:'Обратные выпады', type:'strength', difficulty:1, muscles:['warmup','quads','glutes'], equipment:[],
     defaultSets:3, defaultReps:12,
     hint:['Шаг назад, опусти заднее колено','Корпус прямо','Вернись и смени ногу'],
     warn:'Мягче для коленей чем обычные выпады' },
@@ -1529,9 +1529,24 @@ const EXERCISE_DB = [
   { id:'wu_high_knees', name:'Бег с высоким подниманием колен', type:'cardio', difficulty:1, muscles:['warmup','cardio','quads'], equipment:[],
     defaultSets:2, defaultReps:20, timed:true,
     hint:['Бег на месте','Поднимай колени выше пояса','Руки работают активно','20 секунд в полную силу'] },
+  { id:'wu_torso_rotate', name:'Вращения туловища', type:'stretch', difficulty:1, muscles:['warmup','back','lower_back'], equipment:[],
+    defaultSets:2, defaultReps:15,
+    hint:['Ноги шире плеч, руки перед грудью или на бёдрах','Медленно поворачивай корпус вправо до упора — голова следует за корпусом','Плавно влево','Таз неподвижен, работает только торс'] },
+  { id:'wu_side_bend', name:'Наклоны в сторону', type:'stretch', difficulty:1, muscles:['warmup','lower_back'], equipment:[],
+    defaultSets:2, defaultReps:10,
+    hint:['Ноги на ширине плеч, рука скользит по бедру вниз','Наклон вправо — левая рука тянется вверх','Медленно выпрямись и смени сторону','Не наклоняйся вперёд — только в сторону'] },
+  { id:'wu_forward_bend', name:'Наклоны вперёд', type:'stretch', difficulty:1, muscles:['warmup','hamstrings','lower_back'], equipment:[],
+    defaultSets:2, defaultReps:10,
+    hint:['Ноги на ширине плеч','Медленно опускай руки к полу, колени можно чуть согнуть','Задержись внизу 2 секунды','Медленно выпрямляйся позвонок за позвонком'] },
+  { id:'wu_knee_lift', name:'Подъёмы колена стоя', type:'cardio', difficulty:1, muscles:['warmup','quads','core'], equipment:[],
+    defaultSets:2, defaultReps:15,
+    hint:['Стоя, подними правое колено до уровня пояса','Задержи 1 секунду','Смени ногу','Можно держаться за стену для равновесия'] },
+  { id:'wu_inchworm', name:'Гусеница', type:'stretch', difficulty:1, muscles:['warmup','hamstrings','back','shoulders'], equipment:[],
+    defaultSets:2, defaultReps:8,
+    hint:['Стоя, наклонись и поставь руки на пол','Иди руками вперёд до положения планки','Сделай 1 отжимание (опционально)','Иди ногами к рукам и встань','Разогревает всё тело сразу'] },
 ];
 
-let exDbState = { filterMuscle: null, filterEquip: null, openId: null, customSets: 3, customReps: 10 };
+let exDbState = { filterMuscles: [], filterEquips: [], openId: null, customSets: 3, customReps: 10 };
 
 const TIME_OPTS = [
   { id: 15, val: '15', label: 'Быстро, но лучше чем ничего',              slotsPerDay: 1 },
@@ -2007,7 +2022,7 @@ function renderWorkoutView() {
 function renderBottomNav() {
   const s = state.screen;
   return `<nav class="bottom-nav">
-    <button class="nav-btn ${s === 'exercises' ? 'active' : ''}" onclick="switchScreen('exercises')">${icon('person-simple-run', 22)}</button>
+    <button class="nav-btn ${s === 'exercises' ? 'active' : ''}" onclick="switchScreen('exercises')">${icon('books', 22)}</button>
     <button class="nav-btn disabled">${icon('fork-knife', 22)}</button>
     <button class="nav-btn-center" onclick="switchScreen('workout')">
       <div class="nav-center-circle">${icon('barbell', 20)}</div>
@@ -2601,24 +2616,21 @@ function buildActiveWorkout() {
 function renderActiveWorkout() { return buildActiveWorkout(); }
 
 function renderExerciseDB() {
-  const { filterMuscle, filterEquip, openId } = exDbState;
+  const { filterMuscles, filterEquips, openId } = exDbState;
 
   const muscleChips = MUSCLE_GROUPS.map(m => {
-    const active = filterMuscle === m.id;
+    const active = filterMuscles.includes(m.id);
     return `<button class="ex-chip ${active ? 'ex-chip-on' : ''}" onclick="exDbFilter('muscle','${m.id}')">${m.name}</button>`;
   }).join('');
 
   const equipChips = EQUIPMENT.map(e => {
-    const active = filterEquip === e.id;
+    const active = filterEquips.includes(e.id);
     return `<button class="ex-chip ${active ? 'ex-chip-on' : ''}" onclick="exDbFilter('equip','${e.id}')">${e.label}</button>`;
   }).join('');
 
   let list = EXERCISE_DB;
-  if (filterMuscle) list = list.filter(e => e.muscles.includes(filterMuscle));
-  if (filterEquip) {
-    if (filterEquip === '_none') list = list.filter(e => e.equipment.length === 0);
-    else list = list.filter(e => e.equipment.includes(filterEquip) || e.equipment.length === 0);
-  }
+  if (filterMuscles.length) list = list.filter(e => filterMuscles.some(m => e.muscles.includes(m)));
+  if (filterEquips.length) list = list.filter(e => e.equipment.length === 0 || filterEquips.some(eq => e.equipment.includes(eq)));
 
   const typeLabel = { strength: 'сила', cardio: 'кардио', stretch: 'растяжка' };
   const diffDots = d => '●'.repeat(d) + '○'.repeat(3-d);
@@ -2675,7 +2687,7 @@ function renderExerciseDB() {
     <div class="ex-filters">
       <div class="ex-chips-scroll">${muscleChips}</div>
       <div class="ex-chips-scroll" style="margin-top:8px">${equipChips}</div>
-      ${(filterMuscle||filterEquip) ? `<button class="ex-reset" onclick="exDbReset()">× сбросить фильтр</button>` : ''}
+      ${(filterMuscles.length||filterEquips.length) ? `<button class="ex-reset" onclick="exDbReset()">× сбросить фильтр</button>` : ''}
     </div>
     <div class="ex-count">${list.length} упражнений</div>
     <div class="ex-list">${cards}${noResults}</div>
@@ -2683,8 +2695,9 @@ function renderExerciseDB() {
 }
 
 function exDbFilter(type, val) {
-  if (type === 'muscle') exDbState.filterMuscle = exDbState.filterMuscle === val ? null : val;
-  else exDbState.filterEquip = exDbState.filterEquip === val ? null : val;
+  const arr = type === 'muscle' ? exDbState.filterMuscles : exDbState.filterEquips;
+  const idx = arr.indexOf(val);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(val);
   exDbState.openId = null;
   render();
 }
@@ -2702,7 +2715,7 @@ function exDbAdjust(field, delta) {
   render();
 }
 
-function exDbReset() { exDbState.filterMuscle = null; exDbState.filterEquip = null; exDbState.openId = null; render(); }
+function exDbReset() { exDbState.filterMuscles = []; exDbState.filterEquips = []; exDbState.openId = null; render(); }
 
 function startSingleExercise(exId, sets, reps) {
   const ex = EXERCISE_DB.find(e => e.id === exId);
@@ -2717,7 +2730,7 @@ function startSingleExercise(exId, sets, reps) {
 const SCREEN_TITLES = {
   workout:      { title: 'LAZYLESS',    sub: 'домашние тренировки' },
   profile:      { title: 'ПРОФИЛЬ',     sub: '' },
-  exercises:    { title: 'УПРАЖНЕНИЯ',  sub: 'база' },
+  exercises:    { title: 'БАЗА УПРАЖНЕНИЙ',  sub: '' },
   achievements: { title: 'УСПЕХИ',      sub: '' },
 };
 
