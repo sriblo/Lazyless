@@ -1806,7 +1806,7 @@ function renderWorkoutHome() {
 
   const today = new Date();
   const weekStart = new Date(today);
-  weekStart.setDate(today.getDate() - ((today.getDay() + 6) % 7)); // Monday
+  weekStart.setDate(today.getDate() - ((today.getDay() + 6) % 7));
 
   const weekStrip = `<div style="display:flex;gap:5px;margin-bottom:20px">
     ${WEEK_PLAN.map((d, i) => {
@@ -1840,40 +1840,15 @@ function renderWorkoutHome() {
       </div>` + renderBottomNav();
   }
 
-  const sections = [];
-  (day.scenarios || []).forEach(scId => {
-    const sc = SCENARIOS[scId];
-    if (!sc) return;
-    sc.sections.forEach(sec => sections.push({ title: sec.title, exercises: sec.exercises }));
-  });
-
   const focusTags = [...new Set((day.scenarios || []).map(id => SCENARIOS[id]?.name).filter(Boolean))];
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   const allDone = done === total && total > 0;
   const dayMins = userProfile?.time || 30;
 
-  const sectionsHtml = sections.map(sec => {
-    const rows = sec.exercises.slice(0, 3).map(ex =>
-      `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid #161616">
-        <span style="font-size:0.83rem;color:var(--text)">${ex.name}</span>
-        <span style="font-size:0.7rem;color:var(--muted);white-space:nowrap;margin-left:12px;flex-shrink:0">${ex.meta}</span>
-      </div>`
-    ).join('');
-    const more = sec.exercises.length > 3
-      ? `<div style="font-size:0.7rem;color:var(--muted);padding:8px 0 0">+ ещё ${sec.exercises.length - 3}</div>` : '';
-    return `<div style="margin-bottom:24px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-family:'Unbounded',sans-serif;font-size:0.52rem;color:var(--muted);letter-spacing:0.1em">${sec.title}</span>
-        <span style="font-family:'Unbounded',sans-serif;font-size:0.52rem;color:var(--muted)">${sec.exercises.length} УПР.</span>
-      </div>
-      ${rows}${more}
-    </div>`;
-  }).join('');
-
   const progressBar = done > 0 ? `
-    <div style="margin-bottom:20px">
-      <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted);margin-bottom:6px">
-        <span>прогресс</span><span>${done} из ${total}</span>
+    <div style="margin:20px 0 0">
+      <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--muted);margin-bottom:7px">
+        <span>прогресс</span><span>${done} из ${total} упражнений</span>
       </div>
       <div style="background:var(--border);border-radius:4px;height:3px">
         <div style="background:var(--accent);height:3px;border-radius:4px;width:${pct}%;transition:width 0.3s"></div>
@@ -1881,27 +1856,31 @@ function renderWorkoutHome() {
     </div>` : '';
 
   return weekStrip + `
-    <div style="background:var(--card);border:1px solid ${allDone ? 'var(--accent)' : 'var(--border)'};border-radius:20px;padding:22px 20px 20px">
+    <div style="background:var(--card);border:1px solid ${allDone?'var(--accent)':'var(--border)'};border-radius:20px;padding:22px 20px 20px">
       <div style="font-size:0.55rem;color:var(--muted);font-family:'Unbounded',sans-serif;letter-spacing:0.1em;margin-bottom:12px">${isToday ? 'СЕГОДНЯ' : day.label}</div>
 
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px">
         ${focusTags.map(t => `<span style="padding:5px 13px;background:#181818;border:1px solid #252525;border-radius:20px;font-family:'Unbounded',sans-serif;font-size:0.62rem;font-weight:700;color:var(--text)">${t}</span>`).join('')}
       </div>
 
-      <div style="display:flex;gap:16px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)">
-        <span style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:0.75rem">${icon('clock', 14)} ${dayMins} мин</span>
-        <span style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:0.75rem">${icon('barbell', 14)} ${total} упр.</span>
+      <div style="display:flex;gap:16px">
+        <span style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:0.75rem">${icon('clock', 14)} ${dayMins} минут</span>
+        <span style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:0.75rem">${icon('barbell', 14)} ${total} упражнений</span>
       </div>
 
       ${progressBar}
-      ${sectionsHtml}
 
-      ${allDone
-        ? `<div style="text-align:center;color:var(--accent);font-family:'Unbounded',sans-serif;font-size:0.75rem;font-weight:700;padding:16px 0">${icon('check-fat', 22)} ВЫПОЛНЕНО</div>`
-        : `<button onclick="startWorkout()" style="width:100%;padding:18px;background:var(--accent);border:none;border-radius:14px;color:#000;font-family:'Unbounded',sans-serif;font-size:0.8rem;font-weight:900;letter-spacing:0.05em;cursor:pointer">
-            ${done > 0 ? 'ПРОДОЛЖИТЬ' : 'НАЧАТЬ ТРЕНИРОВКУ'}
-          </button>`
-      }
+      <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px">
+        ${allDone
+          ? `<div style="text-align:center;color:var(--accent);font-family:'Unbounded',sans-serif;font-size:0.75rem;font-weight:700;padding:14px">${icon('check-fat', 22)} ВЫПОЛНЕНО</div>`
+          : `<button onclick="startWorkout()" style="width:100%;padding:18px;background:var(--accent);border:none;border-radius:14px;color:#000;font-family:'Unbounded',sans-serif;font-size:0.8rem;font-weight:900;letter-spacing:0.05em;cursor:pointer">
+              ${done > 0 ? 'ПРОДОЛЖИТЬ' : 'НАЧАТЬ ТРЕНИРОВКУ'}
+            </button>`
+        }
+        <button onclick="state.view='workout';render()" style="width:100%;padding:14px;background:transparent;border:1px solid var(--border);border-radius:14px;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.04em;cursor:pointer">
+          СМОТРЕТЬ ПЛАН ТРЕНИРОВКИ
+        </button>
+      </div>
     </div>
   ` + renderBottomNav();
 }
