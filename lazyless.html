@@ -581,58 +581,69 @@
   .bottom-nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
+    height: 60px;
     background: #0d0d0d;
     border-top: 1px solid var(--border);
     display: flex;
-    align-items: flex-end;
-    padding: 8px 0 max(10px, env(safe-area-inset-bottom));
+    align-items: center;
+    padding-bottom: env(safe-area-inset-bottom);
     z-index: 100;
+    overflow: visible;
   }
   .nav-btn {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    justify-content: center;
+    gap: 5px;
+    height: 100%;
     background: none;
     border: none;
-    color: var(--muted);
+    color: #333;
     cursor: pointer;
     font-family: 'Unbounded', sans-serif;
-    font-size: 0.45rem;
+    font-size: 0.4rem;
     font-weight: 700;
-    letter-spacing: 0.05em;
-    transition: color 0.2s;
+    letter-spacing: 0.06em;
+    transition: color 0.15s;
     padding: 0;
   }
   .nav-btn.active { color: var(--accent); }
-  .nav-btn.disabled { color: #2a2a2a; cursor: default; }
+  .nav-btn.disabled { color: #1e1e1e; cursor: default; pointer-events: none; }
   .nav-btn-center {
     flex: 1;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    justify-content: flex-end;
+    height: 100%;
+    padding-bottom: 8px;
     background: none;
     border: none;
     cursor: pointer;
-    font-family: 'Unbounded', sans-serif;
-    font-size: 0.45rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: #000;
-    padding: 0;
-    margin-bottom: 6px;
   }
   .nav-center-circle {
-    width: 56px; height: 56px;
+    position: absolute;
+    top: -28px;
+    width: 62px; height: 62px;
     border-radius: 50%;
     background: var(--accent);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 20px rgba(198,255,0,0.25);
+    box-shadow: 0 0 32px rgba(198,255,0,0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
   }
-  .nav-btn-center.active .nav-center-circle {
-    box-shadow: 0 0 28px rgba(198,255,0,0.45);
+  .nav-btn-center:active .nav-center-circle {
+    transform: scale(0.92);
+    box-shadow: 0 0 16px rgba(198,255,0,0.2);
+  }
+  .nav-center-label {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.4rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #333;
   }
 
   /* ── PROFILE ── */
@@ -1485,20 +1496,20 @@ function renderBottomNav() {
   const s = state.screen;
   return `<nav class="bottom-nav">
     <button class="nav-btn ${s === 'progress' ? 'active' : ''}" onclick="switchScreen('progress')">
-      ${icon('chart-line', 20)}<span>ПРОГРЕСС</span>
+      ${icon('chart-line', 22)}<span>ПРОГРЕСС</span>
     </button>
-    <button class="nav-btn disabled" onclick="void 0" title="Скоро">
-      ${icon('fork-knife', 20)}<span>ПИТАНИЕ</span>
+    <button class="nav-btn disabled">
+      ${icon('fork-knife', 22)}<span>ПИТАНИЕ</span>
     </button>
-    <button class="nav-btn-center ${s === 'workout' ? 'active' : ''}" onclick="switchScreen('workout')">
-      <div class="nav-center-circle">${icon('lightning', 26)}</div>
-      <span style="color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.45rem;font-weight:700;letter-spacing:0.05em">ТРЕНИРОВКА</span>
+    <button class="nav-btn-center" onclick="switchScreen('workout')">
+      <div class="nav-center-circle">${icon('lightning', 28)}</div>
+      <span class="nav-center-label">ТРЕНИРОВКА</span>
     </button>
     <button class="nav-btn ${s === 'achievements' ? 'active' : ''}" onclick="switchScreen('achievements')">
-      ${icon('trophy', 20)}<span>УСПЕХИ</span>
+      ${icon('trophy', 22)}<span>УСПЕХИ</span>
     </button>
     <button class="nav-btn ${s === 'profile' ? 'active' : ''}" onclick="switchScreen('profile')">
-      ${icon('user', 20)}<span>ПРОФИЛЬ</span>
+      ${icon('user', 22)}<span>ПРОФИЛЬ</span>
     </button>
   </nav>`;
 }
