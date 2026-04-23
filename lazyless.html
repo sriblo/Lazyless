@@ -584,7 +584,8 @@
     background: #0d0d0d;
     border-top: 1px solid var(--border);
     display: flex;
-    padding: 10px 0 max(10px, env(safe-area-inset-bottom));
+    align-items: flex-end;
+    padding: 8px 0 max(10px, env(safe-area-inset-bottom));
     z-index: 100;
   }
   .nav-btn {
@@ -598,13 +599,41 @@
     color: var(--muted);
     cursor: pointer;
     font-family: 'Unbounded', sans-serif;
-    font-size: 0.48rem;
+    font-size: 0.45rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     transition: color 0.2s;
     padding: 0;
   }
   .nav-btn.active { color: var(--accent); }
+  .nav-btn.disabled { color: #2a2a2a; cursor: default; }
+  .nav-btn-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.45rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #000;
+    padding: 0;
+    margin-bottom: 6px;
+  }
+  .nav-center-circle {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 20px rgba(198,255,0,0.25);
+  }
+  .nav-btn-center.active .nav-center-circle {
+    box-shadow: 0 0 28px rgba(198,255,0,0.45);
+  }
 
   /* ── PROFILE ── */
   .profile-avatar {
@@ -1295,7 +1324,7 @@ function openPlanScenario(scenarioId) {
 }
 
 function goBack() {
-  state.view = 'day';
+  state.view = 'home';
   state.activeScenario = null;
   state.activeContext = null;
   render();
@@ -1455,11 +1484,21 @@ function renderWorkoutView() {
 function renderBottomNav() {
   const s = state.screen;
   return `<nav class="bottom-nav">
-    <button class="nav-btn ${s === 'workout' ? 'active' : ''}" onclick="switchScreen('workout')">
-      ${icon('lightning', 22)}<span>ТРЕНИРОВКА</span>
+    <button class="nav-btn ${s === 'progress' ? 'active' : ''}" onclick="switchScreen('progress')">
+      ${icon('chart-line', 20)}<span>ПРОГРЕСС</span>
+    </button>
+    <button class="nav-btn disabled" onclick="void 0" title="Скоро">
+      ${icon('fork-knife', 20)}<span>ПИТАНИЕ</span>
+    </button>
+    <button class="nav-btn-center ${s === 'workout' ? 'active' : ''}" onclick="switchScreen('workout')">
+      <div class="nav-center-circle">${icon('lightning', 26)}</div>
+      <span style="color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.45rem;font-weight:700;letter-spacing:0.05em">ТРЕНИРОВКА</span>
+    </button>
+    <button class="nav-btn ${s === 'achievements' ? 'active' : ''}" onclick="switchScreen('achievements')">
+      ${icon('trophy', 20)}<span>УСПЕХИ</span>
     </button>
     <button class="nav-btn ${s === 'profile' ? 'active' : ''}" onclick="switchScreen('profile')">
-      ${icon('user', 22)}<span>ПРОФИЛЬ</span>
+      ${icon('user', 20)}<span>ПРОФИЛЬ</span>
     </button>
   </nav>`;
 }
@@ -1574,14 +1613,83 @@ function renderProfile() {
     ${renderBottomNav()}`;
 }
 
+function renderPlaceholder(title, iconName, msg) {
+  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;color:var(--muted)">
+    ${icon(iconName, 48)}
+    <div style="font-family:'Unbounded',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text)">${title}</div>
+    <div style="font-size:0.8rem;text-align:center;max-width:220px;line-height:1.5">${msg}</div>
+  </div>${renderBottomNav()}`;
+}
+
+function renderWorkoutHome() {
+  const day = WEEK_PLAN[state.dayIdx];
+  const { total, done } = getDayProgress(state.dayIdx);
+
+  const weekStrip = `<div style="display:flex;gap:6px;margin-bottom:28px;overflow-x:auto;padding-bottom:4px">
+    ${WEEK_PLAN.map((d, i) => {
+      const isToday = i === todayIdx;
+      const isSel = i === state.dayIdx;
+      const { total: t, done: dn } = getDayProgress(i);
+      const allDone = t > 0 && dn === t;
+      return `<button onclick="state.dayIdx=${i};render()" style="
+        flex-shrink:0;width:40px;height:52px;border-radius:12px;border:1px solid ${isSel ? 'var(--accent)' : 'var(--border)'};
+        background:${isSel ? 'var(--accent)' : 'transparent'};
+        color:${isSel ? '#000' : isToday ? 'var(--text)' : 'var(--muted)'};
+        font-family:'Unbounded',sans-serif;font-size:0.5rem;font-weight:700;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer">
+        <span>${d.label}</span>
+        <span style="font-size:0.55rem">${allDone ? '✓' : d.rest ? '—' : ''}</span>
+      </button>`;
+    }).join('')}
+  </div>`;
+
+  let card;
+  if (day.rest) {
+    card = `<div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px 24px;text-align:center">
+      <div style="color:var(--muted);margin-bottom:16px">${icon('moon', 48)}</div>
+      <div style="font-family:'Unbounded',sans-serif;font-size:1.1rem;font-weight:900;margin-bottom:8px">День отдыха</div>
+      <div style="color:var(--muted);font-size:0.85rem;line-height:1.6">${day.restNote}</div>
+    </div>`;
+  } else {
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    const allDone = done === total && total > 0;
+    card = `<div style="background:var(--card);border:1px solid ${allDone ? 'var(--accent)' : 'var(--border)'};border-radius:20px;padding:28px 24px">
+      <div style="font-size:0.65rem;color:var(--muted);font-family:'Unbounded',sans-serif;letter-spacing:0.08em;margin-bottom:8px">${state.dayIdx === todayIdx ? 'СЕГОДНЯ' : WEEK_PLAN[state.dayIdx].label}</div>
+      <div style="font-family:'Unbounded',sans-serif;font-size:1.3rem;font-weight:900;line-height:1.2;margin-bottom:6px">${day.name}</div>
+      <div style="color:var(--muted);font-size:0.8rem;margin-bottom:20px">${total} упражнений · ${userProfile?.time || 30} минут</div>
+      ${total > 0 ? `<div style="background:var(--border);border-radius:4px;height:4px;margin-bottom:20px">
+        <div style="background:var(--accent);height:4px;border-radius:4px;width:${pct}%;transition:width 0.3s"></div>
+      </div>` : ''}
+      ${allDone
+        ? `<div style="text-align:center;color:var(--accent);font-family:'Unbounded',sans-serif;font-size:0.75rem;font-weight:700;padding:16px 0">${icon('check-fat', 24)} ВЫПОЛНЕНО</div>`
+        : `<button onclick="startWorkout()" style="width:100%;padding:18px;background:var(--accent);border:none;border-radius:14px;color:#000;font-family:'Unbounded',sans-serif;font-size:0.8rem;font-weight:900;letter-spacing:0.05em;cursor:pointer">
+            ${done > 0 ? 'ПРОДОЛЖИТЬ' : 'НАЧАТЬ ТРЕНИРОВКУ'}
+          </button>`
+      }
+    </div>`;
+  }
+
+  return weekStrip + card + renderBottomNav();
+}
+
+function startWorkout() {
+  const day = WEEK_PLAN[state.dayIdx];
+  if (!day.scenarios?.length) return;
+  state.view = 'workout';
+  state.activeScenario = day.scenarios[0];
+  state.activeContext = 'plan_' + state.dayIdx;
+  render();
+}
+
 function render() {
   const app = document.getElementById('app');
-  if (state.screen === 'profile') {
-    app.innerHTML = renderProfile();
-  } else if (state.view === 'workout') {
-    app.innerHTML = renderWorkoutView() + renderBottomNav();
-  } else {
-    app.innerHTML = renderDayView() + renderBottomNav();
+  switch (state.screen) {
+    case 'profile':      app.innerHTML = renderProfile(); break;
+    case 'progress':     app.innerHTML = renderPlaceholder('Прогресс', 'chart-line', 'История тренировок и стрики появятся здесь'); break;
+    case 'achievements': app.innerHTML = renderPlaceholder('Успехи', 'trophy', 'Твои достижения и бейджи появятся здесь'); break;
+    default:
+      if (state.view === 'workout') app.innerHTML = renderWorkoutView() + renderBottomNav();
+      else app.innerHTML = renderWorkoutHome();
   }
 }
 
