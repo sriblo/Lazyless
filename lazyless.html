@@ -1280,6 +1280,7 @@ const MUSCLE_GROUPS = [
   { id: 'lower_back', name: 'Поясница',           icon: 'wave-sine' },
   { id: 'cardio',     name: 'Кардио',             icon: 'lightning' },
   { id: 'stretch',    name: 'Растяжка',           icon: 'person-simple' },
+  { id: 'warmup',     name: 'Разминка',           icon: 'flame' },
 ];
 
 const EXERCISE_DB = [
@@ -1502,6 +1503,32 @@ const EXERCISE_DB = [
   { id:'str_spine_twist', name:'Скручивание позвоночника лёжа', type:'stretch', difficulty:1, muscles:['back','lower_back'], equipment:['mat'],
     defaultSets:2, defaultReps:30, timed:true,
     hint:['На спине, подтяни колено к груди','Перекинь его в противоположную сторону, плечи на полу','Голова в другую сторону','30 секунд, смени сторону'] },
+
+  // ── РАЗМИНКА ─────────────────────────────────────────────
+  { id:'wu_jj', name:'Прыжки "Звезда"', type:'cardio', difficulty:1, muscles:['warmup','cardio'], equipment:[],
+    defaultSets:2, defaultReps:20,
+    hint:['Ноги вместе, руки вдоль тела','Прыжок — ноги врозь, руки над головой','Прыжок обратно','Темп средний, разогреваемся'] },
+  { id:'wu_march', name:'Маршировка на месте', type:'cardio', difficulty:1, muscles:['warmup','quads'], equipment:[],
+    defaultSets:1, defaultReps:30, timed:true,
+    hint:['Поднимай колени до уровня бедра','Руки работают как при беге','Спина прямая','30 секунд в хорошем темпе'] },
+  { id:'wu_arm_circles', name:'Вращение руками', type:'stretch', difficulty:1, muscles:['warmup','shoulders'], equipment:[],
+    defaultSets:2, defaultReps:15,
+    hint:['Руки вытянуты в стороны','Большие круги вперёд 15 раз','Большие круги назад 15 раз','Медленно, чувствуй плечевые суставы'] },
+  { id:'wu_hip_circles', name:'Вращение тазом', type:'stretch', difficulty:1, muscles:['warmup','lower_back','glutes'], equipment:[],
+    defaultSets:2, defaultReps:10,
+    hint:['Ноги чуть шире плеч, руки на бёдрах','Медленные большие круги тазом','10 раз в одну сторону, 10 в другую','Разогревает поясницу и тазобедренные'] },
+  { id:'wu_neck', name:'Наклоны головы', type:'stretch', difficulty:1, muscles:['warmup'], equipment:[],
+    defaultSets:1, defaultReps:5,
+    hint:['Медленно наклони голову вправо — 3 секунды','Медленно влево — 3 секунды','Вперёд — назад по 3 секунды','Без резких движений, без вращений'] },
+  { id:'wu_lunge_walk', name:'Выпады на месте', type:'strength', difficulty:1, muscles:['warmup','quads','glutes'], equipment:[],
+    defaultSets:2, defaultReps:10,
+    hint:['Шаг вперёд правой ногой, опусти заднее колено к полу','Обе ноги под 90°','Встань, повтори с левой','Медленно, колено не выходит за носок'] },
+  { id:'wu_ankle_roll', name:'Вращение голеностопа', type:'stretch', difficulty:1, muscles:['warmup','calves'], equipment:[],
+    defaultSets:1, defaultReps:10,
+    hint:['Встань на одну ногу (держись за стену если нужно)','Вращай стопой 10 раз по часовой','10 раз против часовой','Смени ногу'] },
+  { id:'wu_high_knees', name:'Бег с высоким подниманием колен', type:'cardio', difficulty:1, muscles:['warmup','cardio','quads'], equipment:[],
+    defaultSets:2, defaultReps:20, timed:true,
+    hint:['Бег на месте','Поднимай колени выше пояса','Руки работают активно','20 секунд в полную силу'] },
 ];
 
 let exDbState = { filterMuscle: null, filterEquip: null, openId: null, customSets: 3, customReps: 10 };
@@ -1980,7 +2007,7 @@ function renderWorkoutView() {
 function renderBottomNav() {
   const s = state.screen;
   return `<nav class="bottom-nav">
-    <button class="nav-btn ${s === 'exercises' ? 'active' : ''}" onclick="switchScreen('exercises')">${icon('list-bullets', 22)}</button>
+    <button class="nav-btn ${s === 'exercises' ? 'active' : ''}" onclick="switchScreen('exercises')">${icon('person-simple-run', 22)}</button>
     <button class="nav-btn disabled">${icon('fork-knife', 22)}</button>
     <button class="nav-btn-center" onclick="switchScreen('workout')">
       <div class="nav-center-circle">${icon('barbell', 20)}</div>
@@ -2590,7 +2617,7 @@ function renderExerciseDB() {
   if (filterMuscle) list = list.filter(e => e.muscles.includes(filterMuscle));
   if (filterEquip) {
     if (filterEquip === '_none') list = list.filter(e => e.equipment.length === 0);
-    else list = list.filter(e => e.equipment.includes(filterEquip));
+    else list = list.filter(e => e.equipment.includes(filterEquip) || e.equipment.length === 0);
   }
 
   const typeLabel = { strength: 'сила', cardio: 'кардио', stretch: 'растяжка' };
