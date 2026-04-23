@@ -1283,6 +1283,54 @@ const MUSCLE_GROUPS = [
   { id: 'warmup',     name: 'Разминка',           icon: 'flame' },
 ];
 
+const GOAL_SPLITS = {
+  back:   [
+    { name: 'Спина и кор',      muscles: ['back','lower_back','core'] },
+    { name: 'Ноги',             muscles: ['quads','glutes','hamstrings'] },
+    { name: 'Кор и растяжка',   muscles: ['core','stretch','lower_back'] },
+    { name: 'Спина',            muscles: ['back','shoulders','lower_back'] },
+  ],
+  force:  [
+    { name: 'Грудь и трицепс',  muscles: ['chest','triceps','shoulders'] },
+    { name: 'Спина и бицепс',   muscles: ['back','biceps','lower_back'] },
+    { name: 'Ноги',             muscles: ['quads','glutes','hamstrings','calves'] },
+    { name: 'Плечи и кор',      muscles: ['shoulders','triceps','core'] },
+  ],
+  endure: [
+    { name: 'Кардио и ноги',    muscles: ['cardio','quads','glutes'] },
+    { name: 'Верх тела',        muscles: ['chest','back','shoulders'] },
+    { name: 'Интервальная',     muscles: ['cardio','core','quads'] },
+    { name: 'Ноги',             muscles: ['quads','hamstrings','cardio'] },
+  ],
+  core:   [
+    { name: 'Пресс и кор',      muscles: ['core','lower_back'] },
+    { name: 'Кор и ноги',       muscles: ['core','quads','glutes'] },
+    { name: 'Полное тело',      muscles: ['core','chest','back','shoulders'] },
+    { name: 'Кор и растяжка',   muscles: ['core','stretch','lower_back'] },
+  ],
+  lower:  [
+    { name: 'Ноги и ягодицы',   muscles: ['quads','glutes','hamstrings'] },
+    { name: 'Кор и ноги',       muscles: ['core','quads','lower_back'] },
+    { name: 'Растяжка',         muscles: ['stretch','hamstrings','glutes','lower_back'] },
+    { name: 'Ягодицы',          muscles: ['glutes','hamstrings','core'] },
+  ],
+  feet:   [
+    { name: 'Ноги и икры',      muscles: ['calves','quads','glutes'] },
+    { name: 'Кор и ноги',       muscles: ['core','quads','lower_back'] },
+    { name: 'Растяжка ног',     muscles: ['stretch','hamstrings','calves'] },
+    { name: 'Ноги',             muscles: ['quads','hamstrings','glutes','calves'] },
+  ],
+};
+
+const QUICK_WORKOUTS = [
+  { id: 'q_chest',   name: 'Грудь',     muscles: ['chest','triceps'],      icon: 'heartbeat',          exCount: 4 },
+  { id: 'q_back',    name: 'Спина',     muscles: ['back','lower_back'],    icon: 'arrow-fat-up',       exCount: 4 },
+  { id: 'q_legs',    name: 'Ноги',      muscles: ['quads','glutes'],       icon: 'person-simple-walk', exCount: 4 },
+  { id: 'q_core',    name: 'Пресс',     muscles: ['core'],                 icon: 'circles-three',      exCount: 4 },
+  { id: 'q_cardio',  name: 'Кардио',    muscles: ['cardio','quads'],       icon: 'lightning',          exCount: 4 },
+  { id: 'q_stretch', name: 'Растяжка',  muscles: ['stretch','lower_back'], icon: 'person-simple',      exCount: 5 },
+];
+
 const EXERCISE_DB = [
   // ── БЕЗ ИНВЕНТАРЯ ───────────────────────────────────────
   { id:'pushup', name:'Отжимания', type:'strength', difficulty:1, muscles:['chest','triceps','shoulders'], equipment:[],
@@ -1564,37 +1612,77 @@ function saveProfile(profile) {
   userProfile = profile;
 }
 
+function seededShuffle(arr, seed) {
+  const a = [...arr];
+  let s = (seed >>> 0) || 1;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = Math.imul(s ^ s >>> 17, s | 0xd) >>> 0;
+    const j = s % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getWeekSeed() {
+  const d = new Date();
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+  return d.getFullYear() * 53 + week;
+}
+
+function canDoExercise(ex, equipment) {
+  return ex.equipment.length === 0 || ex.equipment.every(e => equipment.includes(e));
+}
+
+function pickExercises(targetMuscles, profile, count, seed) {
+  const owned = profile.equipment || [];
+  const isWoman = profile.gender === 'female';
+  let pool = EXERCISE_DB.filter(ex => {
+    if (!canDoExercise(ex, owned)) return false;
+    if (ex.muscles.every(m => m === 'warmup')) return false;
+    return ex.muscles.some(m => targetMuscles.includes(m));
+  });
+  if (isWoman) {
+    const pref = pool.filter(ex => ex.muscles.some(m => ['glutes','hamstrings','core','stretch'].includes(m)));
+    const rest = pool.filter(ex => !ex.muscles.some(m => ['glutes','hamstrings','core','stretch'].includes(m)));
+    pool = [...seededShuffle(pref, seed), ...seededShuffle(rest, seed + 1)];
+  } else {
+    pool = seededShuffle(pool, seed);
+  }
+  return pool.slice(0, count).map(ex => ({ id: ex.id, sets: ex.defaultSets, reps: ex.defaultReps, timed: !!ex.timed }));
+}
+
+function pickWarmupExercises(count, profile, seed) {
+  const owned = profile.equipment || [];
+  const pool = EXERCISE_DB.filter(ex => ex.muscles.includes('warmup') && canDoExercise(ex, owned));
+  return seededShuffle(pool, seed).slice(0, count);
+}
+
 function generateWeekPlan(profile) {
-  const slots = TIME_OPTS.find(t => t.id === profile.time)?.slotsPerDay || 1;
-  const pool = profile.goals.flatMap(gid => GOALS.find(g => g.id === gid)?.scenarios || []);
-  const unique = [...new Set(pool)];
-
-  // Always add stretch if not already there and time allows
-  if (!unique.includes('stretch') && slots >= 2) unique.push('stretch');
-
   const DAYS = ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
+  const pattern = [true, true, false, true, true, false, false];
   const REST_NOTES = [
     'Активный отдых. Погуляй, подыши.',
     'День отдыха. Мышцы растут в покое.',
     'Полный отдых. Неделя почти сделана.',
   ];
-
-  // workout days pattern: 2 on, 1 off, 2 on, 1 off, 1 off
-  const pattern = [true, true, false, true, true, false, false];
-  let scIdx = 0;
-  let restIdx = 0;
-
+  const seed = getWeekSeed();
+  const goalIds = profile.goals || ['force'];
+  let splits = GOAL_SPLITS[goalIds[0]] || GOAL_SPLITS.force;
+  if (goalIds.length > 1) {
+    const sec = GOAL_SPLITS[goalIds[1]];
+    if (sec) splits = [splits[0], sec[0], splits[1], sec[1] || splits[2]];
+  }
+  const exCount = profile.time === 45 ? 7 : profile.time === 30 ? 5 : 4;
+  let splitIdx = 0, restIdx = 0;
   return DAYS.map((label, i) => {
     if (!pattern[i]) {
       return { label, name: 'Отдых', rest: true, restNote: REST_NOTES[restIdx++ % REST_NOTES.length] };
     }
-    const dayScenarios = [];
-    for (let s = 0; s < slots && unique.length > 0; s++) {
-      dayScenarios.push(unique[scIdx % unique.length]);
-      scIdx++;
-    }
-    const names = dayScenarios.map(id => SCENARIOS[id]?.name || id).join(' + ');
-    return { label, name: names, scenarios: dayScenarios };
+    const split = splits[splitIdx % splits.length];
+    const exercises = pickExercises(split.muscles, profile, exCount, seed + i * 17);
+    splitIdx++;
+    return { label, name: split.name, muscles: split.muscles, exercises };
   });
 }
 
@@ -1771,6 +1859,7 @@ let state = {
   dayIdx: 0,
   activeScenario: null,
   activeContext: null,
+  withWarmup: false,
 };
 
 let profileEdit = null;
@@ -1819,13 +1908,10 @@ function getProgress(context, scenarioId) {
 
 function getDayProgress(dayIdx) {
   const day = WEEK_PLAN[dayIdx];
-  if (day.rest || !day.scenarios) return { total: 0, done: 0 };
-  let total = 0, done = 0;
-  day.scenarios.forEach(scId => {
-    const p = getProgress('plan_' + dayIdx, scId);
-    total += p.total;
-    done += p.done;
-  });
+  if (day.rest || !day.exercises) return { total: 0, done: 0 };
+  const total = day.exercises.length;
+  let done = 0;
+  day.exercises.forEach(ex => { if (checked[`d${dayIdx}_${ex.id}`]) done++; });
   return { total, done };
 }
 
@@ -2286,7 +2372,7 @@ function renderWorkoutHome() {
       </div>` + renderBottomNav();
   }
 
-  const focusTags = [...new Set((day.scenarios || []).map(id => SCENARIOS[id]?.name).filter(Boolean))];
+  const focusTags = [day.name].filter(Boolean);
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   const allDone = done === total && total > 0;
   const dayMins = userProfile?.time || 30;
@@ -2321,6 +2407,9 @@ function renderWorkoutHome() {
           ? `<div style="text-align:center;color:var(--accent);font-family:'Unbounded',sans-serif;font-size:0.75rem;font-weight:700;padding:14px">${icon('check-fat', 22)} ВЫПОЛНЕНО</div>`
           : `<button onclick="startWorkout()" style="width:100%;padding:18px;background:var(--accent);border:none;border-radius:14px;color:#000;font-family:'Unbounded',sans-serif;font-size:0.8rem;font-weight:900;letter-spacing:0.05em;cursor:pointer">
               ${done > 0 ? 'ПРОДОЛЖИТЬ' : 'НАЧАТЬ ТРЕНИРОВКУ'}
+            </button>
+            <button onclick="state.withWarmup=!state.withWarmup;render()" style="width:100%;padding:10px;background:${state.withWarmup?'#0f1f00':'transparent'};border:1px solid ${state.withWarmup?'var(--accent)':'var(--border)'};border-radius:12px;color:${state.withWarmup?'var(--accent)':'var(--muted)'};font-family:'Unbounded',sans-serif;font-size:0.62rem;font-weight:600;letter-spacing:0.04em;cursor:pointer">
+              ${state.withWarmup ? '✓ РАЗМИНКА ВКЛЮЧЕНА' : '+ ВКЛЮЧИТЬ РАЗМИНКУ'}
             </button>`
         }
         <button onclick="state.view='plan';render()" style="width:100%;padding:10px;background:transparent;border:none;color:var(--muted);font-family:'Unbounded',sans-serif;font-size:0.65rem;font-weight:600;letter-spacing:0.04em;cursor:pointer;text-decoration:underline;text-underline-offset:3px">
@@ -2332,11 +2421,11 @@ function renderWorkoutHome() {
     <div class="extra-section">
       <div class="extra-label">ПО НАСТРОЕНИЮ</div>
       <div class="extra-grid">
-        ${Object.values(SCENARIOS).map(sc => `
-          <button class="extra-btn" onclick="startScenario('${sc.id}')">
-            <div class="extra-btn-icon">${icon(sc.icon, 22)}</div>
-            <div class="extra-btn-name">${sc.name}</div>
-            <div class="extra-btn-time">${sc.time}</div>
+        ${QUICK_WORKOUTS.map(q => `
+          <button class="extra-btn" onclick="startQuickWorkout('${q.id}')">
+            <div class="extra-btn-icon">${icon(q.icon, 22)}</div>
+            <div class="extra-btn-name">${q.name}</div>
+            <div class="extra-btn-time">${q.exCount} упр.</div>
           </button>`).join('')}
       </div>
     </div>
@@ -2346,35 +2435,29 @@ function renderWorkoutHome() {
 function renderWorkoutPlan() {
   const day = WEEK_PLAN[state.dayIdx];
   const isToday = state.dayIdx === todayIdx;
-  const sections = [];
-  (day.scenarios || []).forEach(scId => {
-    const sc = SCENARIOS[scId];
-    if (!sc) return;
-    sc.sections.forEach(sec => sections.push({ title: sec.title, exercises: sec.exercises }));
-  });
+  const exercises = (day.exercises || []).map(ex => {
+    const dbEx = EXERCISE_DB.find(e => e.id === ex.id);
+    if (!dbEx) return null;
+    const meta = ex.timed ? `${ex.sets} × ${ex.reps} сек` : `${ex.sets} × ${ex.reps}`;
+    return { name: dbEx.name, meta };
+  }).filter(Boolean);
 
-  const sectionsHtml = sections.map(sec => {
-    const rows = sec.exercises.map(ex =>
-      `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid #161616">
-        <span style="font-size:0.85rem;color:var(--text)">${ex.name}</span>
-        <span style="font-size:0.72rem;color:var(--muted);white-space:nowrap;margin-left:12px;flex-shrink:0">${ex.meta}</span>
-      </div>`
-    ).join('');
-    return `<div style="margin-bottom:28px">
-      <div style="font-family:'Unbounded',sans-serif;font-size:0.55rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:8px;display:flex;justify-content:space-between">
-        <span>${sec.title}</span>
-        <span>${sec.exercises.length} упражнений</span>
-      </div>
-      ${rows}
-    </div>`;
-  }).join('');
+  const rows = exercises.map(ex =>
+    `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid #161616">
+      <span style="font-size:0.85rem;color:var(--text)">${ex.name}</span>
+      <span style="font-size:0.72rem;color:var(--muted);white-space:nowrap;margin-left:12px;flex-shrink:0">${ex.meta}</span>
+    </div>`
+  ).join('');
 
   return `
     <div style="margin-bottom:20px">
       <button class="btn-back" onclick="state.view='home';render()">← НАЗАД</button>
     </div>
-    <div style="font-size:0.55rem;color:var(--muted);font-family:'Unbounded',sans-serif;letter-spacing:0.1em;margin-bottom:16px">${isToday ? 'СЕГОДНЯ' : day.label}</div>
-    ${sectionsHtml}
+    <div style="font-size:0.55rem;color:var(--muted);font-family:'Unbounded',sans-serif;letter-spacing:0.1em;margin-bottom:6px">${isToday ? 'СЕГОДНЯ' : day.label}</div>
+    <div style="font-family:'Unbounded',sans-serif;font-size:0.9rem;font-weight:700;margin-bottom:20px">${day.name}</div>
+    <div style="font-size:0.55rem;color:var(--muted);font-family:'Unbounded',sans-serif;letter-spacing:0.1em;margin-bottom:8px">УПРАЖНЕНИЯ · ${exercises.length}</div>
+    ${rows}
+    <div style="height:24px"></div>
     <button onclick="startWorkout()" style="width:100%;padding:18px;background:var(--accent);border:none;border-radius:14px;color:#000;font-family:'Unbounded',sans-serif;font-size:0.8rem;font-weight:900;letter-spacing:0.05em;cursor:pointer;margin-bottom:8px">
       НАЧАТЬ ТРЕНИРОВКУ
     </button>
@@ -2461,16 +2544,13 @@ function wsSkip() {
 
 function getWorkoutExercises() {
   const day = WEEK_PLAN[state.dayIdx];
-  if (!day.scenarios) return [];
-  const list = [];
-  day.scenarios.forEach(scId => {
-    const sc = SCENARIOS[scId];
-    if (!sc) return;
-    sc.sections.forEach(sec => {
-      sec.exercises.forEach(ex => list.push({ ...ex, scenarioName: sc.name, section: sec.title }));
-    });
-  });
-  return list;
+  if (!day.exercises) return [];
+  return day.exercises.map(ex => {
+    const dbEx = EXERCISE_DB.find(e => e.id === ex.id);
+    if (!dbEx) return null;
+    const meta = ex.timed ? `${ex.sets} × ${ex.reps} сек` : `${ex.sets} × ${ex.reps}`;
+    return { name: dbEx.name, meta, section: day.name, hint: dbEx.hint || [], _exId: ex.id };
+  }).filter(Boolean);
 }
 
 function parseExDetail(meta) {
@@ -2485,29 +2565,40 @@ function parseExDetail(meta) {
   return { sets: 1, reps: 10, type: 'reps' };
 }
 
-function wsBack() {
-  const ws = workoutSession;
-  if (ws.timerInterval) { clearInterval(ws.timerInterval); ws.timerInterval = null; }
-  if (ws.phase === 'result') { ws.phase = 'ready'; ws.timerSeconds = 0; render(); return; }
-  if (ws.setIdx > 0) {
-    ws.setIdx--; ws.results.pop();
-  } else if (ws.exerciseIdx > 0) {
-    ws.exerciseIdx--;
-    const prevDet = parseExDetail(ws.exercises[ws.exerciseIdx].meta);
-    ws.setIdx = prevDet.sets - 1;
-    ws.results.pop();
-    ws.hintOpen = false;
-  } else { return; }
-  ws.phase = 'ready'; ws.timerSeconds = 0;
-  render();
+function startWorkout() {
+  const day = WEEK_PLAN[state.dayIdx];
+  let exercises = getWorkoutExercises();
+  let exerciseIds = day.exercises?.map(ex => ex.id) || [];
+  if (state.withWarmup) {
+    const seed = getWeekSeed() + state.dayIdx * 7;
+    const wu = pickWarmupExercises(3, userProfile, seed);
+    const wuEx = wu.map(ex => ({ name: ex.name, meta: ex.timed ? `1 × ${ex.defaultReps} сек` : `2 × ${ex.defaultReps}`, section: 'РАЗМИНКА', hint: ex.hint || [] }));
+    exercises = [...wuEx, ...exercises];
+    exerciseIds = [...wu.map(() => null), ...exerciseIds];
+  }
+  if (!exercises.length) return;
+  launchSession(exercises, exerciseIds, state.dayIdx);
 }
 
-function startWorkout() {
-  const exercises = getWorkoutExercises();
-  if (!exercises.length) return;
+function startQuickWorkout(quickId) {
+  const q = QUICK_WORKOUTS.find(x => x.id === quickId);
+  if (!q) return;
+  const seed = getWeekSeed() + quickId.length;
+  const picked = pickExercises(q.muscles, userProfile, q.exCount, seed);
+  const exercises = picked.map(ex => {
+    const dbEx = EXERCISE_DB.find(e => e.id === ex.id);
+    if (!dbEx) return null;
+    const meta = ex.timed ? `${ex.sets} × ${ex.reps} сек` : `${ex.sets} × ${ex.reps}`;
+    return { name: dbEx.name, meta, section: q.name, hint: dbEx.hint || [] };
+  }).filter(Boolean);
+  launchSession(exercises, exercises.map(() => null), null);
+}
+
+function launchSession(exercises, exerciseIds, dayIdx) {
   if (workoutSession?.timerInterval) clearInterval(workoutSession.timerInterval);
   workoutSession = {
-    exercises, exerciseIdx: 0, setIdx: 0,
+    exercises, exerciseIds, dayIdx,
+    exerciseIdx: 0, setIdx: 0,
     phase: 'ready', timerSeconds: 0,
     timerInterval: null, hintOpen: false,
     results: [], startTime: Date.now(),
@@ -2554,10 +2645,16 @@ function wsFinishSet(reps) {
   const det = parseExDetail(ws.exercises[ws.exerciseIdx].meta);
   if (ws.setIdx < det.sets - 1) {
     ws.setIdx++; ws.phase = 'ready'; ws.timerSeconds = 0;
-  } else if (ws.exerciseIdx < ws.exercises.length - 1) {
-    ws.exerciseIdx++; ws.setIdx = 0; ws.phase = 'ready'; ws.timerSeconds = 0; ws.hintOpen = false;
   } else {
-    ws.phase = 'complete';
+    const exId = ws.exerciseIds?.[ws.exerciseIdx];
+    if (exId && ws.dayIdx !== null && ws.dayIdx !== undefined) {
+      checked[`d${ws.dayIdx}_${exId}`] = true; save();
+    }
+    if (ws.exerciseIdx < ws.exercises.length - 1) {
+      ws.exerciseIdx++; ws.setIdx = 0; ws.phase = 'ready'; ws.timerSeconds = 0; ws.hintOpen = false;
+    } else {
+      ws.phase = 'complete';
+    }
   }
   render();
 }
