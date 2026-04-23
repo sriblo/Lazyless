@@ -852,6 +852,54 @@
     font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em;
     cursor: pointer; margin-bottom: 28px;
   }
+
+  /* EXERCISE DB */
+  .ex-filters { margin-bottom: 12px; }
+  .ex-chips-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .ex-chips-scroll::-webkit-scrollbar { display: none; }
+  .ex-chip {
+    flex-shrink: 0; padding: 6px 12px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--card);
+    color: var(--muted); font-size: 0.72rem; cursor: pointer; white-space: nowrap;
+  }
+  .ex-chip-on { border-color: var(--accent); color: var(--accent); background: #0f1f00; }
+  .ex-reset { background: none; border: none; color: var(--muted); font-size: 0.7rem; cursor: pointer; padding: 6px 0; }
+  .ex-count { font-size: 0.65rem; color: var(--muted); margin-bottom: 10px; }
+  .ex-list { display: flex; flex-direction: column; gap: 8px; }
+  .ex-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; cursor: pointer;
+  }
+  .ex-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .ex-card-name { font-family: 'Unbounded', sans-serif; font-size: 0.72rem; font-weight: 600; line-height: 1.3; }
+  .ex-card-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .ex-card-sub { font-size: 0.68rem; color: var(--muted); margin-top: 4px; }
+  .ex-type-tag { font-size: 0.58rem; padding: 2px 7px; border-radius: 8px; }
+  .ex-type-strength { background: #0f1f00; color: var(--accent); }
+  .ex-type-cardio { background: #1a0f00; color: #ff9500; }
+  .ex-type-stretch { background: #0a0f1a; color: #5ab4ff; }
+  .ex-diff { font-size: 0.55rem; color: var(--muted); letter-spacing: 1px; }
+  .ex-detail { padding-top: 12px; border-top: 1px solid var(--border); margin-top: 12px; }
+  .ex-detail-row { display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 6px; }
+  .ex-detail-label { color: var(--muted); }
+  .ex-hints { margin: 12px 0; display: flex; flex-direction: column; gap: 6px; }
+  .ex-hint-step { display: flex; gap: 10px; font-size: 0.72rem; line-height: 1.4; }
+  .ex-hint-num {
+    flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+    background: #1a1a1a; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; color: var(--muted); margin-top: 1px;
+  }
+  .ex-warn { font-size: 0.68rem; color: #ff9500; background: #1a0f00; border-radius: 8px; padding: 8px 12px; margin: 8px 0; }
+  .ex-start-row { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .ex-picker { display: flex; align-items: center; justify-content: space-between; background: #161616; border-radius: 10px; padding: 10px 14px; }
+  .ex-pick-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 1rem; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .ex-pick-val { font-size: 0.8rem; }
+  .ex-go-btn {
+    width: 100%; padding: 14px; background: var(--accent); color: #000;
+    border: none; border-radius: 12px; font-family: 'Unbounded', sans-serif;
+    font-size: 0.75rem; font-weight: 900; cursor: pointer; letter-spacing: 0.04em;
+  }
   .profile-section {
     font-family: 'Unbounded', sans-serif;
     font-size: 0.55rem;
@@ -1208,10 +1256,255 @@ const EQUIPMENT = [
   { id: 'dumbbells',   icon: 'barbell',           label: 'Гантели' },
   { id: 'pullup_bar',  icon: 'minus',             label: 'Турник' },
   { id: 'bars',        icon: 'equals',            label: 'Брусья' },
-  { id: 'feet_anchor', icon: 'couch',             label: 'Опора для ног' },
+  { id: 'bench',       icon: 'couch',             label: 'Скамья' },
   { id: 'chair',       icon: 'office-chair',      label: 'Стул' },
   { id: 'bands',       icon: 'link',              label: 'Резинки' },
+  { id: 'kettlebell',  icon: 'barbell',           label: 'Гиря' },
+  { id: 'jump_rope',   icon: 'waves',             label: 'Скакалка' },
+  { id: 'barbell',     icon: 'barbell',           label: 'Штанга' },
+  { id: 'trx',         icon: 'link-simple',       label: 'TRX / петли' },
+  { id: 'ab_wheel',    icon: 'circles-three',     label: 'Ролик для пресса' },
 ];
+
+const MUSCLE_GROUPS = [
+  { id: 'chest',      name: 'Грудь',              icon: 'heartbeat' },
+  { id: 'back',       name: 'Спина',              icon: 'arrow-fat-up' },
+  { id: 'shoulders',  name: 'Плечи',              icon: 'arrows-out-simple' },
+  { id: 'biceps',     name: 'Бицепс',             icon: 'barbell' },
+  { id: 'triceps',    name: 'Трицепс',            icon: 'barbell' },
+  { id: 'core',       name: 'Пресс и кор',        icon: 'circles-three' },
+  { id: 'quads',      name: 'Квадрицепс',         icon: 'person-simple-walk' },
+  { id: 'hamstrings', name: 'Задняя бедра',       icon: 'person-simple-walk' },
+  { id: 'glutes',     name: 'Ягодицы',            icon: 'person-simple-walk' },
+  { id: 'calves',     name: 'Икры',               icon: 'sneaker-move' },
+  { id: 'lower_back', name: 'Поясница',           icon: 'wave-sine' },
+  { id: 'cardio',     name: 'Кардио',             icon: 'lightning' },
+  { id: 'stretch',    name: 'Растяжка',           icon: 'person-simple' },
+];
+
+const EXERCISE_DB = [
+  // ── БЕЗ ИНВЕНТАРЯ ───────────────────────────────────────
+  { id:'pushup', name:'Отжимания', type:'strength', difficulty:1, muscles:['chest','triceps','shoulders'], equipment:[],
+    defaultSets:3, defaultReps:12,
+    hint:['Руки чуть шире плеч, тело — прямая линия от головы до пяток','Опускайся до угла 90° в локтях или до касания грудью','Выдох на подъёме, не прогибай поясницу'],
+    warn:'Если сложно — опусти колени на пол, техника важнее количества' },
+  { id:'pushup_narrow', name:'Отжимания узким хватом', type:'strength', difficulty:2, muscles:['triceps','chest'], equipment:[],
+    defaultSets:3, defaultReps:10,
+    hint:['Руки на ширине плеч или уже, локти идут вдоль корпуса','Не разводи локти в стороны — нагрузка уйдёт с трицепса'] },
+  { id:'pushup_pike', name:'Отжимания Пайк', type:'strength', difficulty:2, muscles:['shoulders','triceps'], equipment:[],
+    defaultSets:3, defaultReps:10,
+    hint:['Встань в позу перевёрнутой V — таз высоко, ноги прямые','Согни локти и опусти голову между руками','Вернись в исходное'],
+    warn:'Работают плечи, не грудь — следи за локтями' },
+  { id:'squat', name:'Приседания', type:'strength', difficulty:1, muscles:['quads','glutes'], equipment:[],
+    defaultSets:3, defaultReps:15,
+    hint:['Ноги на ширине плеч, носки чуть в стороны','Опускайся как на стул позади, спина прямая','Колени над носками, пятки не отрываются','Выдох на подъёме'] },
+  { id:'squat_jump', name:'Прыжковые приседания', type:'cardio', difficulty:2, muscles:['quads','glutes'], equipment:[],
+    defaultSets:3, defaultReps:10,
+    hint:['Присядь до параллели бёдер с полом','Взрывной прыжок вверх','Мягко приземляйся на носки, сразу уходи в следующее приседание'],
+    warn:'Не делай при болях в коленях' },
+  { id:'lunge', name:'Выпады', type:'strength', difficulty:1, muscles:['quads','glutes','hamstrings'], equipment:[],
+    defaultSets:3, defaultReps:12,
+    hint:['Шаг вперёд, опусти заднее колено к полу — не касаясь его','Переднее колено над пяткой','Вернись и смени ногу'] },
+  { id:'lunge_reverse', name:'Обратные выпады', type:'strength', difficulty:1, muscles:['quads','glutes'], equipment:[],
+    defaultSets:3, defaultReps:12,
+    hint:['Шаг назад, опусти заднее колено','Корпус прямо','Вернись и смени ногу'],
+    warn:'Мягче для коленей чем обычные выпады' },
+  { id:'glute_bridge', name:'Ягодичный мостик', type:'strength', difficulty:1, muscles:['glutes','lower_back','hamstrings'], equipment:['mat'],
+    defaultSets:3, defaultReps:15,
+    hint:['На спине, колени согнуты, стопы на полу','Подними таз — от плеч до колен прямая линия','Сожми ягодицы наверху, задержись 1-2 секунды','Медленно опусти'] },
+  { id:'glute_bridge_single', name:'Мостик на одной ноге', type:'strength', difficulty:2, muscles:['glutes','lower_back'], equipment:['mat'],
+    defaultSets:3, defaultReps:10,
+    hint:['Обычный мостик, но вытяни одну ногу горизонтально','Таз держи параллельно полу — не перекашивай'] },
+  { id:'plank', name:'Планка на локтях', type:'strength', difficulty:1, muscles:['core','lower_back','shoulders'], equipment:['mat'],
+    defaultSets:3, defaultReps:30, timed:true,
+    hint:['Локти под плечами, предплечья на полу','Тело — прямая линия, живот подтянут','Дыши ровно'],
+    warn:'Если провисаешь в пояснице — сократи время' },
+  { id:'plank_straight', name:'Планка на руках', type:'strength', difficulty:1, muscles:['core','chest','shoulders'], equipment:['mat'],
+    defaultSets:3, defaultReps:30, timed:true,
+    hint:['Ладони под плечами, тело прямое','Распредели вес по всей ладони'] },
+  { id:'side_plank', name:'Боковая планка', type:'strength', difficulty:2, muscles:['core'], equipment:['mat'],
+    defaultSets:2, defaultReps:20, timed:true,
+    hint:['Упор на локоть — строго под плечом','Подними таз — тело прямая линия','Повтори на другой стороне'] },
+  { id:'mountain_climber', name:'Скалолаз', type:'cardio', difficulty:2, muscles:['core','shoulders'], equipment:['mat'],
+    defaultSets:3, defaultReps:30, timed:true,
+    hint:['Планка на прямых руках','Поочерёдно подтягивай колени к груди в быстром темпе','Бёдра не поднимай'] },
+  { id:'burpee', name:'Берпи', type:'cardio', difficulty:2, muscles:['chest','quads','core'], equipment:[],
+    defaultSets:3, defaultReps:8,
+    hint:['Стоишь → приседаешь, руки на пол → прыжок ногами назад в планку → прыжок ногами к рукам → выпрыгиваешь вверх'],
+    warn:'При головокружении — делай медленнее или без прыжка вверх' },
+  { id:'bicycle_crunch', name:'Велосипед', type:'strength', difficulty:2, muscles:['core'], equipment:['mat'],
+    defaultSets:3, defaultReps:20,
+    hint:['На спине, руки за голову — не тяни за неё','Плечи от пола','Левый локоть к правому колену, правую ногу вытяни — чередуй медленно'],
+    warn:'Если болит шея — подложи руки под голову' },
+  { id:'leg_raise', name:'Подъём ног лёжа', type:'strength', difficulty:2, muscles:['core'], equipment:['mat'],
+    defaultSets:3, defaultReps:12,
+    hint:['На спине, руки вдоль тела или под ягодицы','Подними прямые ноги до 90°','Медленно опусти, не касаясь пола'],
+    warn:'Поясница прижата к полу — не отрывается при опускании' },
+  { id:'superman', name:'Супермен', type:'strength', difficulty:1, muscles:['lower_back','glutes'], equipment:['mat'],
+    defaultSets:3, defaultReps:12,
+    hint:['Лёжа на животе, руки вперёд','Одновременно подними руки и ноги','Задержись 2-3 секунды, медленно опусти'] },
+  { id:'calf_raise', name:'Подъёмы на носки', type:'strength', difficulty:1, muscles:['calves'], equipment:[],
+    defaultSets:3, defaultReps:20,
+    hint:['Стой ровно, можно придерживаться за стену','Поднимись на носки максимально высоко, задержись 1 секунду','Медленно опусти'] },
+  { id:'jumping_jacks', name:'Прыжки ноги врозь', type:'cardio', difficulty:1, muscles:['calves'], equipment:[],
+    defaultSets:3, defaultReps:30, timed:true,
+    hint:['Стой прямо, ноги вместе','Прыгни: ноги врозь, руки над головой → прыгни обратно'] },
+  { id:'high_knees', name:'Высокие колени', type:'cardio', difficulty:1, muscles:['quads'], equipment:[],
+    defaultSets:3, defaultReps:30, timed:true,
+    hint:['Бег на месте — колени выше пояса','Руки двигаются как при беге','Приземляйся на переднюю часть стопы'] },
+  { id:'tricep_dip_floor', name:'Отжимания от пола на трицепс', type:'strength', difficulty:1, muscles:['triceps'], equipment:[],
+    defaultSets:3, defaultReps:12,
+    hint:['Сядь на пол, руки позади — пальцы вперёд','Подними таз и согни локти — опускаешься','Выжми вверх'] },
+  // ── ГАНТЕЛИ ─────────────────────────────────────────────
+  { id:'db_chest_press', name:'Жим гантелей лёжа', type:'strength', difficulty:1, muscles:['chest','triceps','shoulders'], equipment:['dumbbells','mat'],
+    defaultSets:3, defaultReps:12,
+    hint:['На спине или скамье, гантели у груди, локти под 45°','Выжми вверх, медленно опусти до уровня груди'] },
+  { id:'db_chest_fly', name:'Разводка гантелей лёжа', type:'strength', difficulty:2, muscles:['chest'], equipment:['dumbbells','mat'],
+    defaultSets:3, defaultReps:12,
+    hint:['На спине, гантели над грудью, ладони друг к другу','Разводи руки в стороны с чуть согнутыми локтями','Как обнимаешь большое дерево — сводишь обратно'],
+    warn:'Не разводи слишком глубоко — нагрузка на плечевой сустав' },
+  { id:'db_shoulder_press', name:'Жим гантелей над головой', type:'strength', difficulty:1, muscles:['shoulders','triceps'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:12,
+    hint:['Стой или сидь, гантели у плеч, локти под 90°','Жми вверх до почти полного выпрямления','Медленно опусти'] },
+  { id:'db_lateral_raise', name:'Махи гантелей в стороны', type:'strength', difficulty:1, muscles:['shoulders'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:15,
+    hint:['Стой, гантели вдоль тела','Поднимай руки через стороны до уровня плеч','Локти чуть согнуты, мизинец выше большого пальца','Медленно опусти — не бросай'],
+    warn:'Лёгкий вес — это нормально, задние дельты небольшие' },
+  { id:'db_front_raise', name:'Махи гантелей вперёд', type:'strength', difficulty:1, muscles:['shoulders'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:12,
+    hint:['Гантели перед бёдрами','Поднимай одну руку прямо перед собой до уровня плеч','Чередуй или поднимай обе сразу'] },
+  { id:'db_row', name:'Тяга гантели к поясу', type:'strength', difficulty:1, muscles:['back','biceps'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:12,
+    hint:['Упрись одной рукой и коленом в скамью или стул','Гантель в другой руке, рука прямая','Тяни локоть вверх и назад — лопатка сводится','Медленно опусти'] },
+  { id:'db_bent_over_row', name:'Тяга гантелей в наклоне', type:'strength', difficulty:2, muscles:['back','biceps'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:12,
+    hint:['Наклонись вперёд, спина прямая, угол ~45°','Тяни оба локтя вверх — лопатки сводятся','Медленно опусти'] },
+  { id:'db_bicep_curl', name:'Сгибание рук с гантелями', type:'strength', difficulty:1, muscles:['biceps'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:12,
+    hint:['Стой, ладони вперёд','Сгибай руки в локтях — только предплечья двигаются','Локти прижаты к корпусу','Медленно опусти'] },
+  { id:'db_hammer_curl', name:'Молотковые сгибания', type:'strength', difficulty:1, muscles:['biceps'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:12,
+    hint:['Как обычные сгибания, но ладони смотрят друг на друга','Нагружает бицепс и брахиалис'] },
+  { id:'db_tricep_ext', name:'Разгибание рук за головой', type:'strength', difficulty:1, muscles:['triceps'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:12,
+    hint:['Сядь или встань, возьми гантель двумя руками','Подними над головой, согни локти — гантель за голову','Разогни локти вверх'],
+    warn:'Локти смотрят вперёд, не расходятся' },
+  { id:'db_goblet_squat', name:'Гоблет-приседания', type:'strength', difficulty:1, muscles:['quads','glutes','core'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:12,
+    hint:['Держи гантель двумя руками вертикально у груди','Присядь глубоко — локти внутри колен в нижней точке','Спина прямая'] },
+  { id:'db_rdl', name:'Румынская тяга с гантелями', type:'strength', difficulty:2, muscles:['hamstrings','glutes','lower_back'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:12,
+    hint:['Гантели перед бёдрами','Наклоняйся с прямой спиной — гантели скользят по ногам вниз','Натяжение в задней поверхности бедра — хорошо','Вернись усилием ягодиц, не поясницы'],
+    warn:'Не округляй спину' },
+  { id:'db_lunge', name:'Выпады с гантелями', type:'strength', difficulty:2, muscles:['quads','glutes'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:10,
+    hint:['Гантели в руках вдоль тела','Обычная техника выпада'] },
+  { id:'db_lateral_raise_rev', name:'Обратная разводка в наклоне', type:'strength', difficulty:2, muscles:['shoulders','back'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:12,
+    hint:['Наклонись вперёд, гантели свисают','Разводи руки в стороны с чуть согнутыми локтями','Как птица расправляет крылья'],
+    warn:'Лёгкий вес — задние дельты маленькие' },
+  { id:'db_shrug', name:'Шраги с гантелями', type:'strength', difficulty:1, muscles:['back'], equipment:['dumbbells'],
+    defaultSets:3, defaultReps:15,
+    hint:['Гантели вдоль тела','Поднимай плечи максимально к ушам','Задержись 1 секунду','Медленно опусти — не вращай'] },
+  // ── ТУРНИК ──────────────────────────────────────────────
+  { id:'pullup', name:'Подтягивания', type:'strength', difficulty:3, muscles:['back','biceps'], equipment:['pullup_bar'],
+    defaultSets:3, defaultReps:6,
+    hint:['Хват сверху чуть шире плеч','Подтягивайся пока подбородок не окажется над перекладиной','Медленно опускайся до полного выпрямления рук'],
+    warn:'Если нет ни одного — начни с австралийских подтягиваний' },
+  { id:'chinup', name:'Подтягивания обратным хватом', type:'strength', difficulty:2, muscles:['biceps','back'], equipment:['pullup_bar'],
+    defaultSets:3, defaultReps:8,
+    hint:['Хват снизу на ширине плеч или уже','Подтягивайся'],
+    warn:'Легче обычных — больше бицепс' },
+  { id:'australian_pullup', name:'Австралийские подтягивания', type:'strength', difficulty:1, muscles:['back','biceps'], equipment:['pullup_bar'],
+    defaultSets:3, defaultReps:12,
+    hint:['Низкая перекладина — тело наклонно, пятки на полу','Подтягивай грудь к перекладине','Тело прямое от пяток до головы'],
+    warn:'Хорошая замена подтягиваниям для начинающих' },
+  { id:'hanging_knee_raise', name:'Подъём коленей в висе', type:'strength', difficulty:2, muscles:['core'], equipment:['pullup_bar'],
+    defaultSets:3, defaultReps:12,
+    hint:['Вис на перекладине','Подтяни колени к груди','Медленно опусти, не раскачиваясь'] },
+  { id:'hanging_leg_raise', name:'Подъём прямых ног в висе', type:'strength', difficulty:3, muscles:['core'], equipment:['pullup_bar'],
+    defaultSets:3, defaultReps:10,
+    hint:['Вис на перекладине','Подними прямые ноги до 90°','Медленно опусти'],
+    warn:'Освой сначала подъём коленей' },
+  { id:'bar_hang', name:'Вис на перекладине', type:'stretch', difficulty:1, muscles:['back','lower_back'], equipment:['pullup_bar'],
+    defaultSets:3, defaultReps:30, timed:true,
+    hint:['Просто виси расслабленно','Позвоночник вытягивается под весом тела','Дыши глубоко'],
+    warn:'Снимает компрессию дисков после сидячего дня' },
+  // ── БРУСЬЯ ──────────────────────────────────────────────
+  { id:'dips', name:'Отжимания на брусьях', type:'strength', difficulty:2, muscles:['triceps','chest','shoulders'], equipment:['bars'],
+    defaultSets:3, defaultReps:10,
+    hint:['Руки на брусьях, тело в воздухе','Опускайся до угла 90° в локтях','Выжимай вверх'],
+    warn:'Наклон вперёд — больше грудь. Прямо — больше трицепс' },
+  // ── СКАМЬЯ / СТУЛ ────────────────────────────────────────
+  { id:'bench_dip', name:'Обратные отжимания от скамьи', type:'strength', difficulty:1, muscles:['triceps'], equipment:['bench'],
+    defaultSets:3, defaultReps:12,
+    hint:['Руки на краю скамьи или стула, тело перед ней','Опускайся сгибая локти до 90°','Выжимайся вверх'] },
+  { id:'step_up', name:'Зашагивания на скамью', type:'strength', difficulty:1, muscles:['quads','glutes'], equipment:['bench'],
+    defaultSets:3, defaultReps:10,
+    hint:['Поставь одну ногу на скамью','Перенеси вес и встань на неё','Контролируй опускание'] },
+  { id:'bulgarian_squat', name:'Болгарский сплит-присед', type:'strength', difficulty:3, muscles:['quads','glutes'], equipment:['bench'],
+    defaultSets:3, defaultReps:10,
+    hint:['Задняя нога на скамье, передняя далеко впереди','Опускай переднее колено к полу','Корпус прямой'],
+    warn:'Одно из лучших упражнений для ног — тяжелее приседания' },
+  // ── РЕЗИНКИ ─────────────────────────────────────────────
+  { id:'band_pull_apart', name:'Разведение резинки перед собой', type:'strength', difficulty:1, muscles:['shoulders','back'], equipment:['bands'],
+    defaultSets:3, defaultReps:15,
+    hint:['Держи резинку двумя руками на уровне груди','Разводи руки в стороны — лопатки сводятся','Медленно возвращай'] },
+  { id:'band_squat', name:'Приседания с резинкой', type:'strength', difficulty:1, muscles:['quads','glutes'], equipment:['bands'],
+    defaultSets:3, defaultReps:15,
+    hint:['Резинка на бёдрах чуть выше колен','Обычные приседания — резинка не даёт коленям сваливаться внутрь'] },
+  { id:'band_hip_abduction', name:'Отведение ноги с резинкой', type:'strength', difficulty:1, muscles:['glutes'], equipment:['bands','mat'],
+    defaultSets:3, defaultReps:15,
+    hint:['Резинка на лодыжках или бёдрах','Стоя или лёжа на боку — отводи ногу в сторону','Медленно возвращай'] },
+  { id:'band_bicep_curl', name:'Сгибание рук с резинкой', type:'strength', difficulty:1, muscles:['biceps'], equipment:['bands'],
+    defaultSets:3, defaultReps:12,
+    hint:['Встань на резинку, концы в руках','Сгибай руки как с гантелями'] },
+  { id:'band_row', name:'Тяга резинки к поясу', type:'strength', difficulty:1, muscles:['back','biceps'], equipment:['bands'],
+    defaultSets:3, defaultReps:12,
+    hint:['Закрепи резинку спереди на уровне пояса или ниже','Тяни концы к животу — локти вдоль корпуса'] },
+  // ── ГИРЯ ────────────────────────────────────────────────
+  { id:'kb_swing', name:'Махи гирей', type:'cardio', difficulty:2, muscles:['glutes','hamstrings','lower_back'], equipment:['kettlebell'],
+    defaultSets:3, defaultReps:15,
+    hint:['Ноги чуть шире плеч, гиря между ног','Отклонись назад, гиря между ног','Взрывное движение бёдрами — гиря летит вперёд до уровня плеч','Не поднимай руками — сила от бёдер'],
+    warn:'Первый раз делай медленно — техника важнее скорости' },
+  { id:'kb_goblet', name:'Приседания с гирей', type:'strength', difficulty:1, muscles:['quads','glutes','core'], equipment:['kettlebell'],
+    defaultSets:3, defaultReps:12,
+    hint:['Держи гирю у груди за ручку двумя руками','Присядь глубоко — локти внутри колен','Спина прямая'] },
+  // ── СКАКАЛКА ────────────────────────────────────────────
+  { id:'jump_rope', name:'Прыжки на скакалке', type:'cardio', difficulty:1, muscles:['calves'], equipment:['jump_rope'],
+    defaultSets:3, defaultReps:60, timed:true,
+    hint:['Прыгай на носках, колени чуть согнуты','Минимальная высота прыжка','Руки у бёдер, вращение от запястей'] },
+  { id:'jump_rope_high_knees', name:'Скакалка с высокими коленями', type:'cardio', difficulty:2, muscles:['calves','quads'], equipment:['jump_rope'],
+    defaultSets:3, defaultReps:30, timed:true,
+    hint:['Обычные прыжки, но при каждом поднимай колени высоко'] },
+  // ── РАСТЯЖКА ─────────────────────────────────────────────
+  { id:'str_hamstring', name:'Растяжка задней поверхности бедра', type:'stretch', difficulty:1, muscles:['hamstrings'], equipment:['mat'],
+    defaultSets:2, defaultReps:30, timed:true,
+    hint:['На спине, подними ногу и обхвати её руками за бедро или голень','Тяни к себе — натяжение по задней поверхности бедра','Колено можно чуть согнуть','Держи 30 секунд, смени ногу'] },
+  { id:'str_quad', name:'Растяжка квадрицепса стоя', type:'stretch', difficulty:1, muscles:['quads'], equipment:[],
+    defaultSets:2, defaultReps:30, timed:true,
+    hint:['Стой на одной ноге','Согни другую и возьмись за стопу сзади','Подтяни пятку к ягодице','30 секунд, смени ногу'] },
+  { id:'str_chest', name:'Растяжка грудных у стены', type:'stretch', difficulty:1, muscles:['chest'], equipment:[],
+    defaultSets:2, defaultReps:30, timed:true,
+    hint:['Руку согни под 90° и прижми к стене','Медленно поворачивай корпус от стены','Чувствуешь растяжение в груди'] },
+  { id:'str_shoulder', name:'Растяжка плеча', type:'stretch', difficulty:1, muscles:['shoulders'], equipment:[],
+    defaultSets:2, defaultReps:30, timed:true,
+    hint:['Потяни руку горизонтально поперёк груди','Другой рукой прижми её','30 секунд, смени руку'] },
+  { id:'str_hip', name:'Растяжка тазобедренного сустава', type:'stretch', difficulty:1, muscles:['glutes','hamstrings'], equipment:['mat'],
+    defaultSets:2, defaultReps:45, timed:true,
+    hint:['На спине, правую лодыжку на левое колено (поза цифры 4)','Подтяни левое колено к груди','Растяжение в правой ягодице','45 секунд, смени ногу'] },
+  { id:'str_child', name:'Поза ребёнка', type:'stretch', difficulty:1, muscles:['lower_back','back'], equipment:['mat'],
+    defaultSets:2, defaultReps:45, timed:true,
+    hint:['На четвереньках, колени широко','Опусти таз на пятки, вытяни руки вперёд','Лоб к полу, дыши глубоко'] },
+  { id:'str_cat_cow', name:'Кошка-корова', type:'stretch', difficulty:1, muscles:['back','lower_back'], equipment:['mat'],
+    defaultSets:2, defaultReps:10,
+    hint:['На четвереньках — колени под бёдрами, руки под плечами','Кошка: округляй спину вверх на выдохе, голова вниз','Корова: прогибай спину вниз на вдохе, голова вверх','Медленно, чувствуй каждый позвонок'] },
+  { id:'str_spine_twist', name:'Скручивание позвоночника лёжа', type:'stretch', difficulty:1, muscles:['back','lower_back'], equipment:['mat'],
+    defaultSets:2, defaultReps:30, timed:true,
+    hint:['На спине, подтяни колено к груди','Перекинь его в противоположную сторону, плечи на полу','Голова в другую сторону','30 секунд, смени сторону'] },
+];
+
+let exDbState = { filterMuscle: null, filterEquip: null, openId: null, customSets: 3, customReps: 10 };
 
 const TIME_OPTS = [
   { id: 15, val: '15', label: 'Быстро, но лучше чем ничего',              slotsPerDay: 1 },
@@ -1687,7 +1980,7 @@ function renderWorkoutView() {
 function renderBottomNav() {
   const s = state.screen;
   return `<nav class="bottom-nav">
-    <button class="nav-btn ${s === 'progress' ? 'active' : ''}" onclick="switchScreen('progress')">${icon('chart-line', 22)}</button>
+    <button class="nav-btn ${s === 'exercises' ? 'active' : ''}" onclick="switchScreen('exercises')">${icon('list-bullets', 22)}</button>
     <button class="nav-btn disabled">${icon('fork-knife', 22)}</button>
     <button class="nav-btn-center" onclick="switchScreen('workout')">
       <div class="nav-center-circle">${icon('barbell', 20)}</div>
@@ -2280,10 +2573,124 @@ function buildActiveWorkout() {
 
 function renderActiveWorkout() { return buildActiveWorkout(); }
 
+function renderExerciseDB() {
+  const { filterMuscle, filterEquip, openId } = exDbState;
+
+  const muscleChips = MUSCLE_GROUPS.map(m => {
+    const active = filterMuscle === m.id;
+    return `<button class="ex-chip ${active ? 'ex-chip-on' : ''}" onclick="exDbFilter('muscle','${m.id}')">${m.name}</button>`;
+  }).join('');
+
+  const equipChips = EQUIPMENT.map(e => {
+    const active = filterEquip === e.id;
+    return `<button class="ex-chip ${active ? 'ex-chip-on' : ''}" onclick="exDbFilter('equip','${e.id}')">${e.label}</button>`;
+  }).join('');
+
+  let list = EXERCISE_DB;
+  if (filterMuscle) list = list.filter(e => e.muscles.includes(filterMuscle));
+  if (filterEquip) {
+    if (filterEquip === '_none') list = list.filter(e => e.equipment.length === 0);
+    else list = list.filter(e => e.equipment.includes(filterEquip));
+  }
+
+  const typeLabel = { strength: 'сила', cardio: 'кардио', stretch: 'растяжка' };
+  const diffDots = d => '●'.repeat(d) + '○'.repeat(3-d);
+
+  const cards = list.map(ex => {
+    const isOpen = openId === ex.id;
+    const muscleNames = ex.muscles.slice(0,3).map(mid => MUSCLE_GROUPS.find(m=>m.id===mid)?.name || mid).join(', ');
+    const equipNames = ex.equipment.length ? ex.equipment.map(eid => EQUIPMENT.find(e=>e.id===eid)?.label || eid).join(', ') : 'без инвентаря';
+
+    let detail = '';
+    if (isOpen) {
+      const sets = exDbState.customSets;
+      const reps = exDbState.customReps;
+      const hints = (ex.hint || []).map((h,i) => `<div class="ex-hint-step"><span class="ex-hint-num">${i+1}</span>${h}</div>`).join('');
+      const warn = ex.warn ? `<div class="ex-warn">${ex.warn}</div>` : '';
+      detail = `
+        <div class="ex-detail">
+          <div class="ex-detail-row"><span class="ex-detail-label">Мышцы</span><span>${muscleNames}</span></div>
+          <div class="ex-detail-row"><span class="ex-detail-label">Инвентарь</span><span>${equipNames}</span></div>
+          ${hints ? `<div class="ex-hints">${hints}</div>` : ''}
+          ${warn}
+          <div class="ex-start-row">
+            <div class="ex-picker">
+              <button class="ex-pick-btn" onclick="event.stopPropagation();exDbAdjust('sets',-1)">−</button>
+              <span class="ex-pick-val">${sets} подходов</span>
+              <button class="ex-pick-btn" onclick="event.stopPropagation();exDbAdjust('sets',1)">+</button>
+            </div>
+            <div class="ex-picker">
+              <button class="ex-pick-btn" onclick="event.stopPropagation();exDbAdjust('reps',-1)">−</button>
+              <span class="ex-pick-val">${reps} ${ex.timed ? 'секунд' : 'повторений'}</span>
+              <button class="ex-pick-btn" onclick="event.stopPropagation();exDbAdjust('reps',1)">+</button>
+            </div>
+            <button class="ex-go-btn" onclick="event.stopPropagation();startSingleExercise('${ex.id}',${sets},${reps})">ВЫПОЛНИТЬ</button>
+          </div>
+        </div>`;
+    }
+
+    return `<div class="ex-card" onclick="exDbOpen('${ex.id}')">
+      <div class="ex-card-top">
+        <div class="ex-card-name">${ex.name}</div>
+        <div class="ex-card-meta">
+          <span class="ex-type-tag ex-type-${ex.type}">${typeLabel[ex.type]||ex.type}</span>
+          <span class="ex-diff">${diffDots(ex.difficulty)}</span>
+        </div>
+      </div>
+      ${!isOpen ? `<div class="ex-card-sub">${muscleNames}</div>` : ''}
+      ${detail}
+    </div>`;
+  }).join('');
+
+  const noResults = list.length === 0 ? `<div style="color:var(--muted);text-align:center;padding:40px 0">Нет упражнений</div>` : '';
+
+  return `<div>
+    <div class="ex-filters">
+      <div class="ex-chips-scroll">${muscleChips}</div>
+      <div class="ex-chips-scroll" style="margin-top:8px">${equipChips}</div>
+      ${(filterMuscle||filterEquip) ? `<button class="ex-reset" onclick="exDbReset()">× сбросить фильтр</button>` : ''}
+    </div>
+    <div class="ex-count">${list.length} упражнений</div>
+    <div class="ex-list">${cards}${noResults}</div>
+  </div>${renderBottomNav()}`;
+}
+
+function exDbFilter(type, val) {
+  if (type === 'muscle') exDbState.filterMuscle = exDbState.filterMuscle === val ? null : val;
+  else exDbState.filterEquip = exDbState.filterEquip === val ? null : val;
+  exDbState.openId = null;
+  render();
+}
+
+function exDbOpen(id) {
+  exDbState.openId = exDbState.openId === id ? null : id;
+  const ex = EXERCISE_DB.find(e => e.id === id);
+  if (ex) { exDbState.customSets = ex.defaultSets; exDbState.customReps = ex.defaultReps; }
+  render();
+}
+
+function exDbAdjust(field, delta) {
+  if (field === 'sets') exDbState.customSets = Math.max(1, Math.min(10, exDbState.customSets + delta));
+  else exDbState.customReps = Math.max(1, Math.min(120, exDbState.customReps + delta));
+  render();
+}
+
+function exDbReset() { exDbState.filterMuscle = null; exDbState.filterEquip = null; exDbState.openId = null; render(); }
+
+function startSingleExercise(exId, sets, reps) {
+  const ex = EXERCISE_DB.find(e => e.id === exId);
+  if (!ex) return;
+  const meta = ex.timed ? `${sets} × ${reps} сек` : `${sets} × ${reps}`;
+  const sessionExercises = [{ name: ex.name, meta, section: 'упражнение', hint: ex.hint || [] }];
+  workoutSession = { exercises: sessionExercises, exIdx: 0, setIdx: 0, phase: 'ready', customReps: null };
+  state.view = 'active_workout';
+  render();
+}
+
 const SCREEN_TITLES = {
   workout:      { title: 'LAZYLESS',    sub: 'домашние тренировки' },
   profile:      { title: 'ПРОФИЛЬ',     sub: '' },
-  progress:     { title: 'ПРОГРЕСС',    sub: '' },
+  exercises:    { title: 'УПРАЖНЕНИЯ',  sub: 'база' },
   achievements: { title: 'УСПЕХИ',      sub: '' },
 };
 
@@ -2316,7 +2723,7 @@ function render() {
   setHeader(state.screen);
   switch (state.screen) {
     case 'profile':      app.innerHTML = renderProfile(); break;
-    case 'progress':     app.innerHTML = renderPlaceholder('Прогресс', 'chart-line', 'История тренировок и стрики появятся здесь'); break;
+    case 'exercises':    app.innerHTML = renderExerciseDB(); break;
     case 'achievements': app.innerHTML = renderPlaceholder('Успехи', 'trophy', 'Твои достижения и бейджи появятся здесь'); break;
     default:
       if (state.view === 'active_workout') { app.innerHTML = buildActiveWorkout(); return; }
